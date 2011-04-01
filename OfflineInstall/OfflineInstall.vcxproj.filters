@@ -1,0 +1,249 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\WIN">
+      <UniqueIdentifier>{1944d5b8-771e-4d48-ac9e-251155709595}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MAC">
+      <UniqueIdentifier>{a86ff98a-c3a2-4f82-95b5-32de72585dd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\WIN">
+      <UniqueIdentifier>{20abffdc-d1fe-4901-913c-e7111d8befe9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MAC">
+      <UniqueIdentifier>{609671ec-8a9d-4400-9ce3-383184a984a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="commons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions_OS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions_RCS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions_Users.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogExport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OfflineInstall.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OfflineInstallDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions_OS_WIN.cpp">
+      <Filter>Source Files\WIN</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions_RCS_WIN.cpp">
+      <Filter>Source Files\WIN</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions_Users_WIN.cpp">
+      <Filter>Source Files\WIN</Filter>
+    </ClCompile>
+    <ClCompile Include="user_identification.cpp">
+      <Filter>Source Files\WIN</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions_OS_MAC.cpp">
+      <Filter>Source Files\MAC</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions_RCS_MAC.cpp">
+      <Filter>Source Files\MAC</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions_Users_MAC.cpp">
+      <Filter>Source Files\MAC</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="commons.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions_OS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions_RCS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions_Users.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LogExport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OfflineInstall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OfflineInstallDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions_OS_WIN.h">
+      <Filter>Header Files\WIN</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions_RCS_WIN.h">
+      <Filter>Header Files\WIN</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions_Users_WIN.h">
+      <Filter>Header Files\WIN</Filter>
+    </ClInclude>
+    <ClInclude Include="user_identification.h">
+      <Filter>Header Files\WIN</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions_OS_MAC.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions_RCS_MAC.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions_Users_MAC.h">
+      <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\admin-off.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\admin-off.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\admin-on.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\admin-on.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\bitmap3.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\domain-on.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\domain-on.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\icon1.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\macos-off.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\macos-off.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\macos-on.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\macos-on.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\OfflineInstall.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\OfflineInstall.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\rcs-ko.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\rcs-ko.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\rcs-no.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\rcs-no.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\rcs-ok.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\rcs-ok.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\user-off.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\user-off.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\user-on.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\user-on.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\user_domain.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\windows-off.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\windows-off.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\windows-off.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\windows-off.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\windows-on.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\windows-on.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\windows-on.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\windows-on.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="windowsoff.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="windowson.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\winoff.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\winon.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="OfflineInstall.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

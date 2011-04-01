@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="OfflineInstall">
+</Property><Property Name="Solution File" Value="G:\ORNELLA 2\OfflineInstall\OfflineInstall.sln">
+</Property><Property Name="Date" Value="lunedì 10 gennaio 2011">
+</Property><Property Name="Time" Value="15:17">
+</Property></Properties><Event ErrorLevel="0" Project="OfflineInstall" Source="OfflineInstall\OfflineInstall.vcproj" Description="Converting project file 'G:\ORNELLA 2\OfflineInstall\OfflineInstall\OfflineInstall.vcproj'.">
+</Event><Event ErrorLevel="1" Project="OfflineInstall" Source="OfflineInstall\OfflineInstall.vcproj" Description="VCWebServiceProxyGeneratorTool is no longer supported. The tool has been removed from your project settings.">
+</Event><Event ErrorLevel="0" Project="OfflineInstall" Source="OfflineInstall\OfflineInstall.vcproj" Description="Done converting to new project file 'G:\ORNELLA 2\OfflineInstall\OfflineInstall\OfflineInstall.vcxproj'.">
+</Event><Event ErrorLevel="3" Project="OfflineInstall" Source="OfflineInstall\OfflineInstall.vcproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="OfflineInstall.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="OfflineInstall.sln" Description="Converted">
+</Event></UpgradeLog>

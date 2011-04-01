@@ -1,0 +1,1 @@
+extern WCHAR *GetUserHash(WCHAR *user_sid);
