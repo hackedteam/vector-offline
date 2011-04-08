@@ -390,7 +390,7 @@ void COfflineInstallDlg::OnBnClickedOk()
 				break;
 			}
 		}
-		if (i>0 && !DriverInstall(curr_elem ,&m_rcs_info))
+		if (i>0 && !DriverInstall(curr_elem ,&m_rcs_info, users_list_head))
 			MessageBox(L"Kernel components installation failed", L"Error", MB_ICONWARNING);
 	}
 
@@ -458,10 +458,9 @@ void COfflineInstallDlg::OnBnClickedCancel()
 			break;
 		}
 	} 
-	// Se non ci sono più utenti con RCS installato toglie anche il driver 
-	if (i==0 && !DriverUnInstall(curr_elem ,&m_rcs_info)) {
-		//MessageBox(L"Kernel components uninstallation failed", L"Error", MB_ICONWARNING);
-	}
+	// Ora sta alla funzione decidere se rimuovere o meno i componenti unici
+	// Quella windows rimuovera' il driver solo se i==0
+	DriverUnInstall(curr_elem ,&m_rcs_info, users_list_head, i);
 
 	if (count<selected) {
 		swprintf_s(toprint, 1024, L"Uninstallation failed for %d user(s)", selected-count);

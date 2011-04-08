@@ -122,7 +122,7 @@ BOOL WIN_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 }
 
 
-BOOL WIN_DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info)
+BOOL WIN_DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struct_t *user_list)
 {
 	WCHAR src_drv[MAX_PATH];
 	WCHAR dest_drv[MAX_PATH];
@@ -201,7 +201,7 @@ BOOL WIN_DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info)
 }
 
 
-BOOL WIN_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info)
+BOOL WIN_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struct_t *user_list, DWORD installation_count)
 {
 	WCHAR src_drv[MAX_PATH];
 	WCHAR dest_drv[MAX_PATH];
@@ -209,7 +209,7 @@ BOOL WIN_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info)
 	BOOL ret_val = TRUE;
 	DWORD i;
 
-	if (!os_info || !rcs_info)
+	if (!os_info || !rcs_info || installation_count!=0)
 		return FALSE;
 
 	swprintf_s(dest_drv, sizeof(dest_drv)/sizeof(dest_drv[0]), L"%s%s\\drivers\\%s", os_info->drive, os_info->system_root, rcs_info->hsys);

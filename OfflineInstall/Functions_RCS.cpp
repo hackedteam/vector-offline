@@ -95,22 +95,22 @@ BOOL RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct_t
 		return NULL;
 }
 
-BOOL DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info)
+BOOL DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struct_t *user_list)
 {
 	if (os_info->os == WIN_OS)
-		return WIN_DriverInstall(os_info, rcs_info);
+		return WIN_DriverInstall(os_info, rcs_info, user_list);
 	else if (os_info->os == MAC_OS)
-		return MAC_DriverInstall(os_info, rcs_info);
+		return MAC_DriverInstall(os_info, rcs_info, user_list);
 	else
 		return NULL;
 }
 
-BOOL DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info)
+BOOL DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struct_t *user_list, DWORD installation_count)
 {
 	if (os_info->os == WIN_OS)
-		return WIN_DriverUnInstall(os_info, rcs_info);
+		return WIN_DriverUnInstall(os_info, rcs_info, user_list, installation_count);
 	else if (os_info->os == MAC_OS)
-		return MAC_DriverUnInstall(os_info, rcs_info);
+		return MAC_DriverUnInstall(os_info, rcs_info, user_list, installation_count);
 	else
 		return NULL;
 }
