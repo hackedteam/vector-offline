@@ -112,7 +112,7 @@ BOOL LogExport::OfflineRetrieve()
 	// Crea una directory per i log di questo utente
 	GetSystemTime(&system_time);
 	SystemTimeToFileTime(&system_time, &file_time);	
-	swprintf_s(dest_path, sizeof(dest_path)/sizeof(dest_path[0]), L"%s\\RLD_%.8X%.8X", m_dest_drive, file_time.dwHighDateTime, file_time.dwLowDateTime);
+	swprintf_s(dest_path, sizeof(dest_path)/sizeof(dest_path[0]), L"%s\\RLD_%.8X%.8X000000000000000000000000", m_dest_drive, file_time.dwHighDateTime, file_time.dwLowDateTime);
 	if (!CreateDirectory(dest_path, NULL))
 		return FALSE;
 	swprintf_s(dest_subfolder, sizeof(dest_subfolder)/sizeof(dest_subfolder[0]), L"%s\\dec", dest_path);
