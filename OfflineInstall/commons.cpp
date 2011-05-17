@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "commons.h"
+#include <Windows.h>
+#include <AclAPI.h>
 
 void ClearAttributes(WCHAR *fname)
 {
@@ -230,10 +232,63 @@ BOOL RegEnumSubKey(WCHAR *subkey, DWORD index, WCHAR **buffer)
 	return ret_val;
 }
 
+DWORD AddAceToObjectsSecurityDescriptor (
+    LPTSTR pszObjName,          // name of object
+    SE_OBJECT_TYPE ObjectType,  // type of object
+    LPTSTR pszTrustee,          // trustee for new ACE
+    TRUSTEE_FORM TrusteeForm,   // format of trustee structure
+    DWORD dwAccessRights,       // access mask for new ACE
+    ACCESS_MODE AccessMode,     // type of ACE
+    DWORD dwInheritance         // inheritance flags for new ACE
+) 
+{
+	char errorMsg[256];
+    DWORD dwRes = 0;
+    PACL pOldDACL = NULL, pNewDACL = NULL;
+    PSECURITY_DESCRIPTOR pSD = NULL;
+    EXPLICIT_ACCESS ea;
+
+    if (NULL == pszObjName) 
+        return ERROR_INVALID_PARAMETER;
+
+    dwRes = GetNamedSecurityInfo(pszObjName, ObjectType, 
+          DACL_SECURITY_INFORMATION,
+          NULL, NULL, &pOldDACL, NULL, &pSD);
+    if (ERROR_SUCCESS != dwRes)
+        goto Cleanup; 
+
+    ZeroMemory(&ea, sizeof(EXPLICIT_ACCESS));
+    ea.grfAccessPermissions = dwAccessRights;
+    ea.grfAccessMode = AccessMode;
+    ea.grfInheritance= dwInheritance;
+    ea.Trustee.TrusteeForm = TrusteeForm;
+    ea.Trustee.ptstrName = pszTrustee;
+
+    dwRes = SetEntriesInAcl(1, &ea, pOldDACL, &pNewDACL);
+    if (ERROR_SUCCESS != dwRes)
+        goto Cleanup; 
+    
+    dwRes = SetNamedSecurityInfo(pszObjName, ObjectType, 
+          DACL_SECURITY_INFORMATION,
+          NULL, NULL, pNewDACL, NULL);
+    if (ERROR_SUCCESS != dwRes)
+        goto Cleanup; 
+
+    Cleanup:
+        if(pSD != NULL) 
+            LocalFree((HLOCAL) pSD); 
+        if(pNewDACL != NULL) 
+            LocalFree((HLOCAL) pNewDACL); 
+
+        return dwRes;
+}
+
 void GeneralInit()
 {
 	SetPrivilege(SE_RESTORE_NAME);
 	SetPrivilege(SE_BACKUP_NAME);
+	SetPrivilege(SE_SYSTEM_PROFILE_NAME);
+	SetPrivilege(SE_DEBUG_NAME);
 }
 
 

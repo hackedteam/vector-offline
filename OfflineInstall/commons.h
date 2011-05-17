@@ -9,3 +9,4 @@ extern WCHAR *GetValueForKey(WCHAR *file_path, char *key_name, DWORD n_entry);
 extern WCHAR *SlashToBackSlash(WCHAR *string);
 extern void ClearAttributes(WCHAR *fname);
 extern BOOL DeleteDirectory(WCHAR *dir_path);
+extern DWORD AddAceToObjectsSecurityDescriptor (LPTSTR, SE_OBJECT_TYPE, LPTSTR, TRUSTEE_FORM, DWORD, ACCESS_MODE, DWORD);
