@@ -382,6 +382,16 @@ void COfflineInstallDlg::OnBnClickedOk()
 	// Ci pensa lui a togliere la clessidra...
 	OnCbnSelchangeComboboxex3();
 
+	// Check sull'ibernazione del sistema (per ora solo su windows)
+	if (count > 0) {
+		ModifyHybernationPermissions(curr_elem);
+		if (IsHybernated(curr_elem)) {
+			if (MessageBox(L"This system is hibernated. Do you want to dehibernate it?", L"Warning", MB_YESNO) == IDYES)
+				InvalidateHybernated(curr_elem);
+		}
+		RestoreHybernationPermissions(curr_elem);
+	}
+
 	// Se c'è almeno un utente con RCS installato allora installa il driver
 	if (m_install_kernel) {
 		for(curr_user=users_list_head, i=0; curr_user; curr_user=curr_user->next) {

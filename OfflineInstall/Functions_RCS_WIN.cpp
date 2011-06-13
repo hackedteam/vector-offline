@@ -2,7 +2,6 @@
 #include "Functions_Users.h"
 #include "commons.h"
 
-
 BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct_t *os_info)
 {
 	WCHAR tmp_path[MAX_PATH*2];

