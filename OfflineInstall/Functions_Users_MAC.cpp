@@ -108,7 +108,6 @@ users_struct_t *MAC_GetUserList(os_struct_t *os_info, rcs_struct_t *rcs_info)
 		}
 
 		// Tronca il .plist alla fine del nome
-		find_data.cFileName[wcslen(find_data.cFileName)-6] = 0;
 		(*list_curr)->user_name = _wcsdup(find_data.cFileName);
 		(*list_curr)->full_name = _wcsdup(find_data.cFileName);
 		(*list_curr)->desc = NULL;
