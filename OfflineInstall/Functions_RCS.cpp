@@ -72,6 +72,10 @@ BOOL ReadRCSInfo(rcs_struct_t *rcs_info)
 		return FALSE;
 	}
 
+	if(!GetPrivateProfileString(L"RCS", L"FUNC", L"", rcs_info->func_name, sizeof(rcs_info->func_name)/sizeof(rcs_info->func_name[0]), rcs_info->rcs_ini_path)) {
+		return FALSE;
+	}
+
 	return TRUE;
 }
 

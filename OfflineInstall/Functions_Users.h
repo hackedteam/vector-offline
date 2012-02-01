@@ -119,6 +119,7 @@ typedef struct rcs_struct {
 	WCHAR hdrv64[128];
 	WCHAR hsys[128];
 	WCHAR rcs_name[128];
+	WCHAR func_name[24];
 	WCHAR version[128];
 	DWORD hscramb;
 } rcs_struct_t;
