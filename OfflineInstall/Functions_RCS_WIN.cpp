@@ -230,10 +230,13 @@ BOOL WIN_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_str
 			continue;
 		}
 
-		// Cancella la chiave
+		// Cancella le chiavi
 		swprintf_s(src_drv, sizeof(src_drv)/sizeof(src_drv[0]), L"RCS_SYSTEM\\%s\\Services\\%s", subkey, rcs_info->hsys);
+		RegDeleteTree(HKEY_LOCAL_MACHINE, src_drv);
+		swprintf_s(src_drv, sizeof(src_drv)/sizeof(src_drv[0]), L"RCS_SYSTEM\\%s\\Enum\\Root\\LEGACY_%s", subkey, rcs_info->hsys);
+		RegDeleteTree(HKEY_LOCAL_MACHINE, src_drv);
+
 		SAFE_FREE(subkey);
-		RegDeleteKey(HKEY_LOCAL_MACHINE, src_drv);
 	}
 
 	RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SYSTEM\\");
