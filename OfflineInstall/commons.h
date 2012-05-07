@@ -1,4 +1,5 @@
 #define SAFE_FREE(x) if(x) {free(x); x=NULL;}
+#define LOOP for(;;)
 
 extern void GeneralInit();
 extern void ReadRegValue(WCHAR *subkey, WCHAR *value, DWORD *type, WCHAR **buffer);

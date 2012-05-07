@@ -32,6 +32,7 @@
 #define IDC_CHECK1                      1017
 #define IDC_BUTTON4                     1018
 #define IDC_PROGRESS1                   1019
+#define IDC_BUTTON5                     1019
 #define ID_SELECTALL_UNSELECTALL        32771
 #define ID_SELECTITEMS_UNSELECTALL      32772
 
