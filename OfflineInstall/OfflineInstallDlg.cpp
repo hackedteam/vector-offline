@@ -645,7 +645,6 @@ void COfflineInstallDlg::OnBnClickedButton5()
     if ( pidl != 0 ) {
         // get the name of the folder
         WCHAR dest_path[MAX_PATH];
-		WCHAR src_path[MAX_PATH];
 		BOOL failed=FALSE;
         if ( SHGetPathFromIDList ( pidl, dest_path ) ) {
 

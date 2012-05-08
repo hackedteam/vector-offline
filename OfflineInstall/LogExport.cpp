@@ -290,7 +290,7 @@ BOOL LogExport::Dump(rcs_struct_t *rcs_info, DWORD time_bias, WCHAR *user_name, 
 	if (!WritePrivateProfileStringW(L"OFFLINE", L"SYNCTIME", wchar_date, clear_path))
 		return FALSE;
 
-	ExploreDirectoryAndCapture(src_path, 100, NULL, dest_path);
+	ExploreDirectoryAndCapture(src_path, 100, rcs_info->masks, dest_path);
 	return TRUE;
 }
 
