@@ -658,9 +658,16 @@ void COfflineInstallDlg::OnBnClickedButton5()
 			POSITION p = m_user_list.GetFirstSelectedItemPosition();
 			while (p) {
 				nSelected = m_user_list.GetNextSelectedItem(p);
-				if ( (curr_user = FindUser(nSelected, users_list_head)) ) 
-					if (!export_object.Dump(&m_rcs_info, curr_elem->time_bias, curr_user->user_name, curr_user->user_hash, curr_elem->computer_name, curr_user->user_home, dest_path, curr_elem->os, curr_elem->arch))
+				if ( (curr_user = FindUser(nSelected, users_list_head)) ) {
+					WCHAR dump_dir[MAX_PATH];
+					if (curr_elem->os == MAC_OS) 
+						_snwprintf_s(dump_dir, MAX_PATH, _TRUNCATE, L"%s\\%s", curr_elem->drive, SlashToBackSlash(curr_user->user_home));
+					else
+						_snwprintf_s(dump_dir, MAX_PATH, _TRUNCATE, L"%s", curr_user->user_home);
+
+					if (!export_object.Dump(&m_rcs_info, curr_elem->time_bias, curr_user->user_name, curr_user->user_hash, curr_elem->computer_name, dump_dir, dest_path, curr_elem->os, curr_elem->arch))
 						failed=TRUE;
+				}
 			}
 			SetCursor(m_stdcursor);
 			if (failed)
