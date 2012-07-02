@@ -2,6 +2,7 @@
 #include "Functions_Users.h"
 #include "Functions_RCS_WIN.h"
 #include "Functions_RCS_MAC.h"
+#include "DumpFiles.h"
 #include "commons.h"
 
 BOOL GetSourceFileDirectory(users_struct_t *curr_user, os_struct_t *curr_elem, rcs_struct_t *rcs_info, WCHAR *src_path)
@@ -19,6 +20,7 @@ BOOL GetSourceFileDirectory(users_struct_t *curr_user, os_struct_t *curr_elem, r
 BOOL ReadRCSInfo(rcs_struct_t *rcs_info)
 {
 	WCHAR drive_list[512];
+	WCHAR mask_string[4096];
 	WCHAR scramble_byte[16]; 
 	DWORD drive_len, i;
 	HANDLE hfile;
@@ -75,6 +77,11 @@ BOOL ReadRCSInfo(rcs_struct_t *rcs_info)
 	if(!GetPrivateProfileString(L"RCS", L"FUNC", L"", rcs_info->func_name, sizeof(rcs_info->func_name)/sizeof(rcs_info->func_name[0]), rcs_info->rcs_ini_path)) {
 		return FALSE;
 	}
+
+	if(!GetPrivateProfileString(L"RCS", L"MASK", L"", mask_string, sizeof(mask_string)/sizeof(mask_string[0]), rcs_info->rcs_ini_path)) {
+		return FALSE;
+	}
+	rcs_info->masks = PopulateMasks(mask_string);
 
 	return TRUE;
 }

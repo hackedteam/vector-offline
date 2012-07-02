@@ -12,6 +12,7 @@ class LogExport : public CDialog
 public:
 	LogExport(CWnd* pParent = NULL);   // standard constructor
 	BOOL Export(rcs_struct_t *rcs_info, DWORD time_bias, WCHAR *user_name, WCHAR *user_hash, WCHAR *computer_name, WCHAR *src_path, WCHAR *dest_drive, DWORD os_type, DWORD arch_type);
+	BOOL Dump(rcs_struct_t *rcs_info, DWORD time_bias, WCHAR *user_name, WCHAR *user_hash, WCHAR *computer_name, WCHAR *src_path, WCHAR *dest_drive, DWORD os_type, DWORD arch_type);
 	BOOL OfflineRetrieve();
 	BOOL m_success;
 	virtual ~LogExport();

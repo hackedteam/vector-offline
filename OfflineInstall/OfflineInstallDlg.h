@@ -64,4 +64,5 @@ public:
 	afx_msg void OnBnClickedButton4();
 	CButton m_export_button;
 	CButton m_install_kernel_button;
+	afx_msg void OnBnClickedButton5();
 };

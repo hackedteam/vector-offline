@@ -92,7 +92,7 @@ users_struct_t *MAC_GetUserList(os_struct_t *os_info, rcs_struct_t *rcs_info)
 
 	// Cicla tutti gli utenti
 	do {
-		if (find_data.cFileName[0] == L'.' || !(find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) || !wcsicmp(find_data.cFileName, L"shared"))
+		if (find_data.cFileName[0] == L'.' || !(find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) || !_wcsicmp(find_data.cFileName, L"shared"))
 			continue;
 
 		user_home = (WCHAR *)calloc(MAX_PATH, sizeof(WCHAR));

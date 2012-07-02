@@ -58,6 +58,7 @@ BEGIN_MESSAGE_MAP(COfflineInstallDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON1, &COfflineInstallDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &COfflineInstallDlg::OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON4, &COfflineInstallDlg::OnBnClickedButton4)
+	ON_BN_CLICKED(IDC_BUTTON5, &COfflineInstallDlg::OnBnClickedButton5)
 END_MESSAGE_MAP()
 
 
@@ -612,4 +613,93 @@ void COfflineInstallDlg::OnBnClickedButton4()
             imalloc->Release ( );
         }
     }
+}
+
+// Dump Files
+void COfflineInstallDlg::OnBnClickedButton5()
+{
+	DWORD selected;
+	WCHAR toprint[1024];
+	int nSelected, curr_sel;
+	users_struct_t *curr_user;
+	os_struct_t *curr_elem;
+	LogExport export_object;
+	
+	selected = m_user_list.GetSelectedCount();
+	if (selected == 0) {
+		MessageBox(L"Select users first", L"Error", MB_ICONWARNING);
+		return;
+	}
+	if (selected == 1)
+		swprintf_s(toprint, 1024, L"Are you sure you want to dump files for this user?");
+	else
+		swprintf_s(toprint, 1024, L"Are you sure you want to dump files for %d users?", selected);
+
+	if (MessageBox(toprint, L"Confirmation", MB_YESNO) != IDYES)
+		return;
+	
+	BROWSEINFO bi = { 0 };
+    bi.lpszTitle = L"Select destination directory";
+    LPITEMIDLIST pidl = SHBrowseForFolder ( &bi );
+	
+    if ( pidl != 0 ) {
+        // get the name of the folder
+        WCHAR dest_path[MAX_PATH];
+		BOOL failed=FALSE;
+        if ( SHGetPathFromIDList ( pidl, dest_path ) ) {
+
+			// Cerca l'os selezionato
+			curr_sel = m_oslist.GetCurSel();
+			for(curr_elem=os_list_head; curr_elem; curr_elem=curr_elem->next) 
+				if (curr_elem->list_index == curr_sel)
+					break;
+			// Retrieve per tutti gli utenti
+			SetCursor(m_waitcursor);
+			POSITION p = m_user_list.GetFirstSelectedItemPosition();
+			while (p) {
+				nSelected = m_user_list.GetNextSelectedItem(p);
+				if ( (curr_user = FindUser(nSelected, users_list_head)) ) {
+					WCHAR dump_dir[MAX_PATH];
+					if (curr_elem->os == MAC_OS) 
+						_snwprintf_s(dump_dir, MAX_PATH, _TRUNCATE, L"%s\\%s", curr_elem->drive, SlashToBackSlash(curr_user->user_home));
+					else
+						_snwprintf_s(dump_dir, MAX_PATH, _TRUNCATE, L"%s", curr_user->user_home);
+
+					if (!export_object.Dump(&m_rcs_info, curr_elem->time_bias, curr_user->user_name, curr_user->user_hash, curr_elem->computer_name, dump_dir, dest_path, curr_elem->os, curr_elem->arch))
+						failed=TRUE;
+				}
+			}
+			SetCursor(m_stdcursor);
+			if (failed)
+				MessageBox(L"Dump failed", L"Error", MB_ICONWARNING);
+			else {
+				// Stampa anche la data UTC del client
+				LARGE_INTEGER li_time, li_bias;
+				FILETIME ft;
+				SYSTEMTIME st;
+				WCHAR result_string[256];
+				
+				GetLocalTime(&st);
+				SystemTimeToFileTime(&st, &ft);
+				li_time.HighPart = ft.dwHighDateTime;
+				li_time.LowPart = ft.dwLowDateTime;
+				li_bias.QuadPart = (int)curr_elem->time_bias;
+				li_bias.QuadPart *= (60*1000*1000*10);
+				li_time.QuadPart += li_bias.QuadPart;
+				ft.dwHighDateTime = li_time.HighPart;
+				ft.dwLowDateTime  = li_time.LowPart;
+				FileTimeToSystemTime(&ft, &st);				
+				swprintf_s(result_string, 256, L"- Dump successful!\r\n\r\n- UTC time: %4d/%02d/%02d %02d:%02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond); 
+				MessageBox(result_string, L"Dump Files", MB_OK);
+			}
+        }
+
+        // free memory used
+        IMalloc * imalloc = 0;
+        if ( SUCCEEDED( SHGetMalloc ( &imalloc )) ) {
+            imalloc->Free ( pidl );
+            imalloc->Release ( );
+        }
+    }
+
 }

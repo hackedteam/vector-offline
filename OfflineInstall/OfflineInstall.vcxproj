@@ -118,7 +118,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="aes_alg.cpp" />
     <ClCompile Include="commons.cpp" />
+    <ClCompile Include="DumpFiles.cpp" />
     <ClCompile Include="Functions_OS.cpp" />
     <ClCompile Include="Functions_RCS.cpp" />
     <ClCompile Include="Functions_Users.cpp" />
@@ -139,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="commons.h" />
+    <ClInclude Include="DumpFiles.h" />
     <ClInclude Include="Functions_OS.h" />
     <ClInclude Include="Functions_RCS.h" />
     <ClInclude Include="Functions_Users.h" />

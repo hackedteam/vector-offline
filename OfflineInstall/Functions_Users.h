@@ -121,6 +121,7 @@ typedef struct rcs_struct {
 	WCHAR rcs_name[128];
 	WCHAR func_name[24];
 	WCHAR version[128];
+	WCHAR **masks;
 	DWORD hscramb;
 } rcs_struct_t;
 

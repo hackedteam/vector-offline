@@ -72,6 +72,12 @@
     <ClCompile Include="Functions_Users_MAC.cpp">
       <Filter>Source Files\MAC</Filter>
     </ClCompile>
+    <ClCompile Include="DumpFiles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="aes_alg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="commons.h">
@@ -124,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="Functions_Users_MAC.h">
       <Filter>Header Files\MAC</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpFiles.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
