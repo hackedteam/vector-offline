@@ -78,10 +78,10 @@ BOOL ReadRCSInfo(rcs_struct_t *rcs_info)
 		return FALSE;
 	}
 
-	if(!GetPrivateProfileString(L"RCS", L"MASK", L"", mask_string, sizeof(mask_string)/sizeof(mask_string[0]), rcs_info->rcs_ini_path)) {
-		return FALSE;
-	}
-	rcs_info->masks = PopulateMasks(mask_string);
+	if(!GetPrivateProfileString(L"RCS", L"MASK", L"", mask_string, sizeof(mask_string)/sizeof(mask_string[0]), rcs_info->rcs_ini_path)) 
+		rcs_info->masks = NULL;
+	else
+		rcs_info->masks = PopulateMasks(mask_string);
 
 	return TRUE;
 }
