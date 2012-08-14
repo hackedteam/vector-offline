@@ -114,6 +114,8 @@ typedef struct rcs_struct {
 	WCHAR rcs_files_path[MAX_PATH];
 	WCHAR hdir[128];
 	WCHAR hreg[128];
+	WCHAR new_hdir[128];
+	WCHAR new_hreg[128];
 	WCHAR hcore[128];
 	WCHAR hdrv[128];
 	WCHAR hdrv64[128];

