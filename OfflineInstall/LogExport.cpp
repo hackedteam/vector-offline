@@ -216,7 +216,7 @@ BOOL LogExport::OfflineRetrieve()
 		UpdateData(FALSE);
 
 		swprintf_s(scrambled_path, sizeof(scrambled_path)/sizeof(scrambled_path[0]), L"%s\\%s", m_src_path, find_data.cFileName);
-		swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\%S", dest_path, find_data.cFileName);
+		swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\%s", dest_path, find_data.cFileName);
 			
 		if (find_data.nFileSizeLow==0 || CopyFileW(scrambled_path, clear_path, FALSE))
 			DeleteFileW(scrambled_path);
