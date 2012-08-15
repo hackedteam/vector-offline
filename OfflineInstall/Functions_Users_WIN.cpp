@@ -82,7 +82,8 @@ DWORD WIN_GetUserRCSStatus(users_struct_t *user_info, rcs_struct_t *rcs_info)
 			SAFE_FREE(rcs_reg);
 			is_reg = TRUE;
 		} else {
-			ReadRegValue(L"RCS_NTUSER\\software\\microsoft\\windows\\currentversion\\policies\\explorer\\run", rcs_info->new_hreg, NULL, &rcs_reg);
+			// XXX-NEWREG
+			ReadRegValue(L"RCS_NTUSER\\software\\microsoft\\windows\\currentversion\\run", rcs_info->new_hreg, NULL, &rcs_reg);
 			if (rcs_reg) {
 				SAFE_FREE(rcs_reg);
 				is_reg = TRUE;

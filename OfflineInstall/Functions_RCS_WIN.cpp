@@ -114,7 +114,8 @@ BOOL WIN_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 
 	reg_ret1 = RegDeleteKeyValue(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce", rcs_info->hreg);
 	reg_ret2 = RegDeleteKeyValue(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", rcs_info->hreg);
-	reg_ret3 = RegDeleteKeyValue(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run", rcs_info->new_hreg);
+	// XXX-NEWREG
+	reg_ret3 = RegDeleteKeyValue(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", rcs_info->new_hreg);
 	if ( reg_ret1!=ERROR_SUCCESS && reg_ret2!=ERROR_SUCCESS && reg_ret3!=ERROR_SUCCESS) {
 		RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\");
 		return FALSE;
