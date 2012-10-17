@@ -242,7 +242,6 @@ DWORD AddAceToObjectsSecurityDescriptor (
     DWORD dwInheritance         // inheritance flags for new ACE
 ) 
 {
-	char errorMsg[256];
     DWORD dwRes = 0;
     PACL pOldDACL = NULL, pNewDACL = NULL;
     PSECURITY_DESCRIPTOR pSD = NULL;
