@@ -115,7 +115,7 @@ typedef struct rcs_struct {
 	WCHAR hdir[128];
 	WCHAR hreg[128];
 	WCHAR new_hdir[128];
-	WCHAR new_hreg[128];
+	WCHAR old_hreg[128];
 	WCHAR hcore[128];
 	WCHAR hdrv[128];
 	WCHAR hdrv64[128];
