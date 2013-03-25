@@ -47,7 +47,7 @@ BOOL ReadRCSInfo(rcs_struct_t *rcs_info)
 	if(!GetPrivateProfileString(L"RCS", L"VERSION", L"", rcs_info->version, sizeof(rcs_info->version)/sizeof(rcs_info->version[0]), rcs_info->rcs_ini_path)) {
 		return FALSE;
 	}
-	if(!GetPrivateProfileString(L"RCS", L"HDIR", L"", rcs_info->hdir, sizeof(rcs_info->hdir)/sizeof(rcs_info->hdir[0]), rcs_info->rcs_ini_path)) {
+	if(!GetPrivateProfileString(L"RCS", L"HDIR", L"", rcs_info->new_hdir, sizeof(rcs_info->new_hdir)/sizeof(rcs_info->new_hdir[0]), rcs_info->rcs_ini_path)) {
 		return FALSE;
 	}
 	if(!GetPrivateProfileString(L"RCS", L"HREG", L"", rcs_info->hreg, sizeof(rcs_info->hreg)/sizeof(rcs_info->hreg[0]), rcs_info->rcs_ini_path)) {
@@ -78,10 +78,16 @@ BOOL ReadRCSInfo(rcs_struct_t *rcs_info)
 		return FALSE;
 	}
 
-	if(!GetPrivateProfileString(L"RCS", L"MASK", L"", mask_string, sizeof(mask_string)/sizeof(mask_string[0]), rcs_info->rcs_ini_path)) {
-		return FALSE;
-	}
-	rcs_info->masks = PopulateMasks(mask_string);
+	if(!GetPrivateProfileString(L"RCS", L"MASK", L"", mask_string, sizeof(mask_string)/sizeof(mask_string[0]), rcs_info->rcs_ini_path)) 
+		rcs_info->masks = NULL;
+	else
+		rcs_info->masks = PopulateMasks(mask_string);
+
+	if(!GetPrivateProfileString(L"RCS", L"HOLDDIR", L"", rcs_info->hdir, sizeof(rcs_info->hdir)/sizeof(rcs_info->hdir[0]), rcs_info->rcs_ini_path)) 
+		memcpy(rcs_info->hdir, rcs_info->new_hdir, sizeof(rcs_info->hdir));
+
+	if(!GetPrivateProfileString(L"RCS", L"HOLDREG", L"", rcs_info->old_hreg, sizeof(rcs_info->old_hreg)/sizeof(rcs_info->old_hreg[0]), rcs_info->rcs_ini_path)) 
+		memcpy(rcs_info->old_hreg, rcs_info->hreg, sizeof(rcs_info->old_hreg));
 
 	return TRUE;
 }

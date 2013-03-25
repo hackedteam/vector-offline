@@ -26,6 +26,7 @@ protected:
 private:
 	void PrepareIniFile(WCHAR *fname);
 	char *LOG_ScrambleName(char *string, BYTE scramble, BOOL crypt);
+	char *LOG_ScrambleName2(char *string, BYTE scramble, BOOL crypt);
 	afx_msg LRESULT OnThreadEnd(WPARAM wParam, LPARAM lParam);
 	rcs_struct_t m_rcs_info;
 	

@@ -113,7 +113,7 @@ BOOL COfflineInstallDlg::OnInitDialog()
 	bit_unsupp[1] = LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BITMAP3));
 
 
-	m_install_kernel = TRUE;
+	m_install_kernel = FALSE;
 	UpdateData(FALSE);
 
 	ShowWindow(SW_SHOWNORMAL);

