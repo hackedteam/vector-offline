@@ -56,6 +56,91 @@ BOOL WIN_IsSupported(os_struct_t *os_info)
 	return FALSE;
 }
 
+// Torna TRUE se c'e' un software pericoloso
+BOOL IsBlackListedSoftware(WCHAR *drive_letter)
+{
+	HKEY hKeyUninstall = NULL, hKeyProgram = NULL;
+	DWORD dwordval, index, len;
+	WCHAR stringval[128], product[256];
+	ULONG uSamDesidered = KEY_READ;
+	WCHAR software_hive_path[MAX_PATH];
+	WCHAR system_root[MAX_PATH];
+	HANDLE hfile;
+	DWORD i;
+	BOOL ret_val = FALSE;
+
+	// Monta l'hive SOFTWARE
+	swprintf_s(system_root, MAX_PATH, L"windows\\system32");
+	swprintf_s(software_hive_path, MAX_PATH, L"%s%s%s", drive_letter, system_root, L"\\config\\software");
+	
+	hfile = CreateFile(software_hive_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	if (hfile == INVALID_HANDLE_VALUE) {
+		swprintf_s(system_root, MAX_PATH, L"winnt\\system32");
+		swprintf_s(software_hive_path, MAX_PATH, L"%s%s%s", drive_letter, system_root, L"\\config\\software");
+		hfile = CreateFile(software_hive_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+		if (hfile == INVALID_HANDLE_VALUE)
+			return TRUE;
+	}
+	CloseHandle(hfile);
+	if (RegLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SOFTWARE\\", software_hive_path) != ERROR_SUCCESS) 
+		return TRUE;
+	
+	// Al primo giro guarda quelli a 32 poi quelli a 64bit 
+	for (i=0; i<2; i++) {
+		do {
+			index = 0;
+			if (i == 0) {
+				if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"RCS_SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall", 0, uSamDesidered, &hKeyUninstall) != ERROR_SUCCESS) 
+					break;
+			} else {
+				if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"RCS_SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall", 0, uSamDesidered, &hKeyUninstall) != ERROR_SUCCESS) 
+					break;
+			}
+
+			while(1) {
+				if(hKeyProgram) {
+					RegCloseKey(hKeyProgram);
+					hKeyProgram = NULL;
+				}
+
+				len = sizeof(stringval) / sizeof(stringval[0]);
+				if(RegEnumKeyExW(hKeyUninstall, index++, stringval, &len, NULL, NULL, NULL, NULL) != ERROR_SUCCESS) break;
+
+				if(RegOpenKeyExW(hKeyUninstall, stringval, 0, KEY_READ, &hKeyProgram) != ERROR_SUCCESS) continue;
+
+				if(!RegQueryValueExW(hKeyProgram, L"ParentKeyName", NULL, NULL, NULL, NULL)) continue;
+
+				len = sizeof(dwordval);
+				if(!RegQueryValueExW(hKeyProgram, L"SystemComponent", NULL, NULL, (LPBYTE)&dwordval, &len) && (dwordval == 1)) continue;
+
+				len = sizeof(stringval);
+				if(RegQueryValueExW(hKeyProgram, L"DisplayName", NULL, NULL, (LPBYTE)stringval, &len)) continue;
+
+				wcsncpy_s(product, sizeof(product) / sizeof(product[0]), stringval, _TRUNCATE);
+
+				len = sizeof(stringval);
+				if(!RegQueryValueExW(hKeyProgram, L"DisplayVersion", NULL, NULL, (LPBYTE)stringval, &len)) {
+					wcsncat_s(product, sizeof(product) / sizeof(product[0]), L"   (", _TRUNCATE);
+					wcsncat_s(product, sizeof(product) / sizeof(product[0]), stringval, _TRUNCATE);
+					wcsncat_s(product, sizeof(product) / sizeof(product[0]), L")", _TRUNCATE);
+				}
+
+				// if (IsDangerous(product) 
+				//		ret_val = TRUE;
+				MessageBox(NULL, product, L"Product", MB_OK);
+				
+			}
+		} while(0);
+
+		if(hKeyUninstall) {
+			RegCloseKey(hKeyUninstall);
+			hKeyUninstall = NULL;
+		}
+	}
+
+	RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SOFTWARE\\");
+	return ret_val;
+}
 
 BOOL RecognizeWindowsOS(WCHAR *drive_letter, os_struct_t *os_struct)
 {
@@ -126,6 +211,8 @@ BOOL RecognizeWindowsOS(WCHAR *drive_letter, os_struct_t *os_struct)
 
 	RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SOFTWARE\\");
 	RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SYSTEM\\");
+
+	//IsBlackListedSoftware(drive_letter);
 
 	return TRUE;
 }
