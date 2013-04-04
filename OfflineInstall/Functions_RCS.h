@@ -8,3 +8,4 @@ extern void InvalidateHybernated(os_struct_t *os_info);
 extern BOOL IsHybernated(os_struct_t *os_info);
 extern void RestoreHybernationPermissions(os_struct_t *os_info);
 extern void ModifyHybernationPermissions(os_struct_t *os_info);
+extern BOOL IsDangerousString(WCHAR *);

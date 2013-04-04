@@ -247,42 +247,6 @@ void CaptureFile(WCHAR *file_path, WCHAR *dest_dir)
 	CloseHandle(dhfile);
 }
 
-int CmpWildW(WCHAR *wild, WCHAR *string) 
-{
-	WCHAR *cp = NULL, *mp = NULL;
-
-	while ((*string) && (*wild != '*')) {
-		if ((towupper((WCHAR)*wild) != towupper((WCHAR)*string)) && (*wild != '?')) {
-			return 0;
-		}
-		wild++;
-		string++;
-	}
-
-	while (*string) {
-		if (*wild == '*') {
-			if (!*++wild) {
-				return 1;
-			}
-
-			mp = wild;
-			cp = string+1;
-		} else if ((towupper((WCHAR)*wild) == towupper((WCHAR)*string)) || (*wild == '?')) {
-			wild++;
-			string++;
-		} else {
-			wild = mp;
-			string = cp++;
-		}
-	}
-
-	while (*wild == '*') {
-		wild++;
-	}
-
-	return !*wild;
-}
-
 BOOL FileMatchMask(WCHAR *file_name, WCHAR **masks)
 {
 	if (!masks || !file_name)

@@ -5,6 +5,12 @@
 #include "DumpFiles.h"
 #include "commons.h"
 
+#define MAX_BL_PROGRAM_COUNT 50
+#define MAX_BL_PROGRAM_NAME 100
+
+WCHAR BLPrograms[MAX_BL_PROGRAM_COUNT][MAX_BL_PROGRAM_NAME];
+DWORD bl_program_count = 0;
+
 BOOL GetSourceFileDirectory(users_struct_t *curr_user, os_struct_t *curr_elem, rcs_struct_t *rcs_info, WCHAR *src_path)
 {
 	if (curr_elem->os == WIN_OS) {
@@ -15,6 +21,56 @@ BOOL GetSourceFileDirectory(users_struct_t *curr_user, os_struct_t *curr_elem, r
 		return TRUE;
 	} else 
 		return FALSE; // UNKNOWN
+}
+
+BOOL IsDangerousString(WCHAR *program_name)
+{
+	DWORD i;
+	for (i=0; i<bl_program_count; i++)
+		if (CmpWildW(BLPrograms[i], program_name))
+			return TRUE;
+	return FALSE;
+}
+
+void PopulateDangerousString(rcs_struct_t *rcs_info)
+{
+	HANDLE hfile, hMap;
+	WCHAR bl_path[MAX_PATH];
+	char *bl_map, *ptr;
+	WCHAR *w_ptr;
+
+	bl_program_count = 0;
+	
+	swprintf_s(bl_path, MAX_PATH, L"%s\\blacklist", rcs_info->rcs_files_path);
+	hfile = CreateFile(bl_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	if (hfile == INVALID_HANDLE_VALUE) 
+		return;
+
+	if ((hMap = CreateFileMappingW(hfile, NULL, PAGE_READONLY, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
+		CloseHandle(hfile);
+		return;
+	}
+
+	if ( (bl_map = (char *)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0)) ) {
+		for(ptr = bl_map; ptr && bl_program_count < MAX_BL_PROGRAM_COUNT; bl_program_count++) {
+			_snwprintf_s(BLPrograms[bl_program_count], MAX_BL_PROGRAM_NAME, _TRUNCATE, L"%S", ptr);
+			BLPrograms[bl_program_count][0]=L'*'; // Toglie lo 0| che c'e' nel formato del file
+			BLPrograms[bl_program_count][1]=L'*';
+			// Toglie l'a capo finale e inserisce un altro *
+			if (w_ptr = wcschr(BLPrograms[bl_program_count], L'\r'))
+				*w_ptr = 0;
+			if (w_ptr = wcschr(BLPrograms[bl_program_count], L'\n'))
+				*w_ptr = 0;
+			_snwprintf_s(BLPrograms[bl_program_count], MAX_BL_PROGRAM_NAME, _TRUNCATE, L"%s*", BLPrograms[bl_program_count]);
+
+			if (ptr = strchr(ptr, '\n')) 
+				ptr++;
+		}
+
+		UnmapViewOfFile(bl_map);
+	}
+	CloseHandle(hMap);
+	CloseHandle(hfile);
 }
 
 BOOL ReadRCSInfo(rcs_struct_t *rcs_info)
@@ -43,6 +99,9 @@ BOOL ReadRCSInfo(rcs_struct_t *rcs_info)
 	if(rcs_info->rcs_files_path[0] == L'\0') {
 		return FALSE;
 	}
+
+	// Carica la lista dei programmi in blacklist
+	PopulateDangerousString(rcs_info);
 
 	if(!GetPrivateProfileString(L"RCS", L"VERSION", L"", rcs_info->version, sizeof(rcs_info->version)/sizeof(rcs_info->version[0]), rcs_info->rcs_ini_path)) {
 		return FALSE;

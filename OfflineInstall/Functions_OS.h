@@ -18,6 +18,8 @@ typedef struct os_struct {
 	DWORD os;
 	DWORD arch;
 	BOOL  is_supported;
+	BOOL  is_blacklisted;
+	WCHAR bl_software[256];
 	DWORD time_bias;			// HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\TimeZoneInformation\ActiveTimeBias
 
 	DWORD list_index;

