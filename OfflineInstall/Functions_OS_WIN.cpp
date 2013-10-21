@@ -52,7 +52,8 @@ BOOL WIN_IsSupported(os_struct_t *os_info)
 		 !wcscmp(os_info->curr_ver, L"5.2") || // Windows 2003
 		 !wcscmp(os_info->curr_ver, L"6.0") || // Windows Vista o 2008
 		 !wcscmp(os_info->curr_ver, L"6.1") || // Windows 7
-		 !wcscmp(os_info->curr_ver, L"6.2"))   // Windows 8
+		 !wcscmp(os_info->curr_ver, L"6.2") || // Windows 8
+		 !wcscmp(os_info->curr_ver, L"6.3"))   // Windows 8.1
 		return TRUE;
 
 	return FALSE;
