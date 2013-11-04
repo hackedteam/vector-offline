@@ -14,7 +14,7 @@ BOOL MAC_IsSupported(os_struct_t *os_info)
 	if (!os_info->csd_version)
 		return FALSE;
 
-	if (wcsncmp(os_info->csd_version, L"10.5", 4) && wcsncmp(os_info->csd_version, L"10.6", 4) && wcsncmp(os_info->csd_version, L"10.7", 4) && wcsncmp(os_info->csd_version, L"10.8", 4)) 
+	if (wcsncmp(os_info->csd_version, L"10.5", 4) && wcsncmp(os_info->csd_version, L"10.6", 4) && wcsncmp(os_info->csd_version, L"10.7", 4) && wcsncmp(os_info->csd_version, L"10.8", 4) && wcsncmp(os_info->csd_version, L"10.9", 4)) 
 		return FALSE;
 
 	return TRUE;
