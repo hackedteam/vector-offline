@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Functions_OS.h"
+#include "Functions_Users.h"
+#include "Functions_RCS.h"
 #include "commons.h"
 
 
@@ -75,7 +77,7 @@ BOOL RecognizeMacOS(WCHAR *drive_letter, os_struct_t *os_struct)
 	os_struct->reg_owner  = _wcsdup(L"N.A.");
 	os_struct->product_id = _wcsdup(L"N.A.");
 	os_struct->arch = MAC_GetArch(os_struct);
-	os_struct->is_blacklisted = FALSE;
+	os_struct->is_blacklisted = BL_SAFE;
 	os_struct->is_supported = MAC_IsSupported(os_struct); // Va chiamata per ultima...
 
 	return TRUE;
