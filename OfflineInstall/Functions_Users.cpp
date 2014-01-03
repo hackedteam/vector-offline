@@ -67,6 +67,7 @@ void FreeUsersList(users_struct_t *list_head)
 		SAFE_FREE(list_head->user_local_settings);
 		SAFE_FREE(list_head->user_home);
 		SAFE_FREE(list_head->user_hash);
+		SAFE_FREE(list_head->user_startup);
 
 		SAFE_FREE(list_head);
 		list_head = next;

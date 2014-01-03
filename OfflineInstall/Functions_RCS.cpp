@@ -178,6 +178,10 @@ BOOL ReadRCSInfo(rcs_struct_t *rcs_info)
 		return FALSE;
 	}
 
+	if(!GetPrivateProfileString(L"RCS", L"SOLDIER", L"", rcs_info->soldier_name, sizeof(rcs_info->soldier_name)/sizeof(rcs_info->soldier_name[0]), rcs_info->rcs_ini_path)) {
+		_snwprintf_s(rcs_info->soldier_name, 32, _TRUNCATE, L"NOT-PRESENT");
+	}
+
 	if(!GetPrivateProfileString(L"RCS", L"MASK", L"", mask_string, sizeof(mask_string)/sizeof(mask_string[0]), rcs_info->rcs_ini_path)) 
 		rcs_info->masks = NULL;
 	else

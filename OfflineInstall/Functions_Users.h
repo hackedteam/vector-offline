@@ -96,6 +96,7 @@ typedef struct users_struct {
 	WCHAR *user_temp;
 	WCHAR *user_local_settings;
 	WCHAR *user_home;
+	WCHAR *user_startup;
 	WCHAR *user_hash;
 	BOOL is_admin;
 	BOOL is_local;
@@ -121,6 +122,7 @@ typedef struct rcs_struct {
 	WCHAR hdrv64[128];
 	WCHAR hsys[128];
 	WCHAR rcs_name[128];
+	WCHAR soldier_name[128];
 	WCHAR func_name[24];
 	WCHAR version[128];
 	WCHAR **masks;
