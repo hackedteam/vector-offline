@@ -117,11 +117,6 @@ BOOL WIN_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 			ret_val = FALSE;
 	}
 
-	// Cancella un eventuale Soldier
-	swprintf_s(tmp_path, MAX_PATH, L"%s\\%s.exe", user_info->user_startup, rcs_info->soldier_name);
-	ClearAttributes(tmp_path);
-	DeleteFile(tmp_path);
-
 	// Cancella la chiave nel registry
 	swprintf_s(tmp_path, sizeof(tmp_path)/sizeof(tmp_path[0]), L"%s%s", user_info->user_home, L"\\ntuser.dat");
 	if (RegLoadKey(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\", tmp_path) != ERROR_SUCCESS) 
@@ -136,6 +131,13 @@ BOOL WIN_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 	}
 
 	RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\");
+
+	// Cancella un eventuale Soldier
+	swprintf_s(tmp_path, MAX_PATH, L"%s\\%s.exe", user_info->user_startup, rcs_info->soldier_name);
+	ClearAttributes(tmp_path);
+	if (DeleteFile(tmp_path))
+		return TRUE;
+
 	return ret_val;
 }
 
