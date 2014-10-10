@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Functions_OS.h"
+#include "Functions_Users.h"
+#include "Functions_RCS.h"
 #include "commons.h"
 
 
@@ -14,7 +16,7 @@ BOOL MAC_IsSupported(os_struct_t *os_info)
 	if (!os_info->csd_version)
 		return FALSE;
 
-	if (wcsncmp(os_info->csd_version, L"10.5", 4) && wcsncmp(os_info->csd_version, L"10.6", 4) && wcsncmp(os_info->csd_version, L"10.7", 4) && wcsncmp(os_info->csd_version, L"10.8", 4)) 
+	if (wcsncmp(os_info->csd_version, L"10.5", 4) && wcsncmp(os_info->csd_version, L"10.6", 4) && wcsncmp(os_info->csd_version, L"10.7", 4) && wcsncmp(os_info->csd_version, L"10.8", 4) && wcsncmp(os_info->csd_version, L"10.9", 4)) 
 		return FALSE;
 
 	return TRUE;
@@ -75,6 +77,7 @@ BOOL RecognizeMacOS(WCHAR *drive_letter, os_struct_t *os_struct)
 	os_struct->reg_owner  = _wcsdup(L"N.A.");
 	os_struct->product_id = _wcsdup(L"N.A.");
 	os_struct->arch = MAC_GetArch(os_struct);
+	os_struct->is_blacklisted = BL_SAFE;
 	os_struct->is_supported = MAC_IsSupported(os_struct); // Va chiamata per ultima...
 
 	return TRUE;

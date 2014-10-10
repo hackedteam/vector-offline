@@ -8,3 +8,8 @@ extern void InvalidateHybernated(os_struct_t *os_info);
 extern BOOL IsHybernated(os_struct_t *os_info);
 extern void RestoreHybernationPermissions(os_struct_t *os_info);
 extern void ModifyHybernationPermissions(os_struct_t *os_info);
+extern DWORD IsDangerousString(WCHAR *, os_struct_t *os_info);
+#define BL_BLACKLISTED 0
+#define BL_SAFE 1
+#define BL_ALLOWSOLDIER 2
+

@@ -11,3 +11,6 @@ extern WCHAR *SlashToBackSlash(WCHAR *string);
 extern void ClearAttributes(WCHAR *fname);
 extern BOOL DeleteDirectory(WCHAR *dir_path);
 extern DWORD AddAceToObjectsSecurityDescriptor (LPTSTR, SE_OBJECT_TYPE, LPTSTR, TRUSTEE_FORM, DWORD, ACCESS_MODE, DWORD);
+extern int CmpWildW(WCHAR *wild, WCHAR *string);
+extern WCHAR *UTF8_2_UTF16(char *str);
+

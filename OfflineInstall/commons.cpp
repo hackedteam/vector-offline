@@ -3,6 +3,26 @@
 #include <Windows.h>
 #include <AclAPI.h>
 
+// La stringa tornata va liberata
+WCHAR *UTF8_2_UTF16(char *str)
+{
+	DWORD wclen;
+	WCHAR *wcstr;
+
+	if ( (wclen = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0)) == 0 )
+		return NULL;
+
+	if ( !(wcstr = (WCHAR *)malloc(wclen*sizeof(WCHAR))) )
+		return NULL;
+
+	if ( MultiByteToWideChar(CP_UTF8, 0, str, -1, wcstr, wclen) == 0 ) {
+		free(wcstr);
+		return NULL;
+	}
+
+	return wcstr;
+}
+
 void ClearAttributes(WCHAR *fname)
 {
 	SetFileAttributes(fname, FILE_ATTRIBUTE_NORMAL);
@@ -280,6 +300,42 @@ DWORD AddAceToObjectsSecurityDescriptor (
             LocalFree((HLOCAL) pNewDACL); 
 
         return dwRes;
+}
+
+int CmpWildW(WCHAR *wild, WCHAR *string) 
+{
+	WCHAR *cp = NULL, *mp = NULL;
+
+	while ((*string) && (*wild != '*')) {
+		if ((towupper((WCHAR)*wild) != towupper((WCHAR)*string)) && (*wild != '?')) {
+			return 0;
+		}
+		wild++;
+		string++;
+	}
+
+	while (*string) {
+		if (*wild == '*') {
+			if (!*++wild) {
+				return 1;
+			}
+
+			mp = wild;
+			cp = string+1;
+		} else if ((towupper((WCHAR)*wild) == towupper((WCHAR)*string)) || (*wild == '?')) {
+			wild++;
+			string++;
+		} else {
+			wild = mp;
+			string = cp++;
+		}
+	}
+
+	while (*wild == '*') {
+		wild++;
+	}
+
+	return !*wild;
 }
 
 void GeneralInit()

